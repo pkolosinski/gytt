@@ -8,7 +8,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
 export default defineConfig([
-  globalIgnores(['dist', 'src/components/ui']),
+  globalIgnores(['dist', 'src/shared/components/shadcn', 'src/shared/components/shadcn/ui']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

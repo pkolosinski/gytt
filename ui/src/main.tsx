@@ -1,15 +1,19 @@
-import { createRoot } from 'react-dom/client';
+import { StrictMode } from 'react';
 
 import './index.css';
+import { createRoot } from 'react-dom/client';
+
+import './app/i18n';
 import { BrowserRouter, Route, Routes } from 'react-router';
 
-import { Habits } from './habits/Habits';
-import './i18n';
+import { HabitList } from './features/habits/components/HabitList';
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <Routes>
-      <Route index element={<Habits />} />
-    </Routes>
-  </BrowserRouter>
+  <StrictMode>
+    <BrowserRouter>
+      <Routes>
+        <Route index element={<HabitList />} />
+      </Routes>
+    </BrowserRouter>
+  </StrictMode>
 );

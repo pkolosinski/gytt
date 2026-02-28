@@ -1,10 +1,19 @@
 import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 
 import './index.css';
+import { createRoot } from 'react-dom/client';
+
+import './app/i18n';
+import { BrowserRouter, Route, Routes } from 'react-router';
+
+import { HabitList } from './features/habits/components/HabitList';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <h1>Hello world!</h1>
+    <BrowserRouter>
+      <Routes>
+        <Route index element={<HabitList />} />
+      </Routes>
+    </BrowserRouter>
   </StrictMode>
 );

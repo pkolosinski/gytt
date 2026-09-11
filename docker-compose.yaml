@@ -1,0 +1,46 @@
+name: gytt
+
+services:
+#  server:
+#    build:
+#      context: .
+#      dockerfile: deploy/Dockerfile
+#    container_name: gytt_server
+#    depends_on:
+#      - couchbase
+#    restart: on-failure:3
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - private
+
+  couchbase:
+    image: couchbase:community-8.0.2
+    container_name: gytt_db
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    volumes:
+      - couchbase_data:/opt/couchbase/var
+    networks:
+      - private
+    healthcheck:
+      test: "curl -f http://localhost:8091/pools || exit 1"
+      interval: 5s
+      timeout: 1s
+      retries: 3
+
+  couchbase_bootstrap:
+    image: couchbase:community-8.0.2
+    depends_on:
+      couchbase:
+        condition: service_healthy
+    networks:
+      - private
+
+volumes:
+  couchbase_data:
+
+networks:
+  private:
+    internal: true

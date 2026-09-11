@@ -1,0 +1,3 @@
+# 0004 — Use a reverse-proxy Basic Auth boundary
+
+Accepted. The responsive SPA and HTTP API share one origin behind a user-operated HTTPS reverse proxy with a local certificate authority. The proxy requires one shared HTTP Basic Auth credential for the entire origin, rejects unauthenticated requests before forwarding, and strips the credential header before requests reach the private application listener. The application has no accounts, sessions, sign-in route, or per-record owner identity. Mutations still require the exact configured Origin because browsers attach cached Basic credentials automatically. This minimizes MVP identity code at the accepted cost of browser-native login UX, unreliable explicit logout, and one shared dataset.

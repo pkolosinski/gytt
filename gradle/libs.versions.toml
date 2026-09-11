@@ -1,0 +1,42 @@
+[versions]
+arrow = "2.2.3"
+couchbase = "3.12.3"
+kotest = "6.2.4"
+kotlin = "2.4.20"
+ktlint = "14.2.0"
+ktor = "3.6.0"
+logback = "1.5.37"
+testcontainers = "1.21.4"
+
+[libraries]
+# gradle plugins
+kotest-gradle-plugin = { module = "io.kotest:io.kotest.gradle.plugin", version.ref = "kotest" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
+
+# arrow
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+
+# couchbase
+couchbase-client = { module = "com.couchbase.client:kotlin-client", version.ref = "couchbase" }
+testcontainers-couchbase = { module = "org.testcontainers:couchbase", version.ref = "testcontainers" }
+
+# kotest
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-runner = { module = "io.kotest:kotest-runner-junit6", version.ref = "kotest" }
+
+# ktor
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+
+# other
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+[plugins]
+integration-test = { id = "com.coditory.integration-test", version = "2.2.5" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

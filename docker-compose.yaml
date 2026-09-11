@@ -1,0 +1,63 @@
+name: gytt
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    container_name: gytt_server
+    depends_on:
+      couchbase_bootstrap:
+        condition: service_completed_successfully
+    restart: on-failure:3
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      - private
+    environment:
+      COUCHBASE_URL: "couchbase://couchbase"
+      COUCHBASE_USERNAME: "${GYTT_COUCHBASE_USERNAME:-gytt-app}"
+      COUCHBASE_PASSWORD: "${GYTT_COUCHBASE_PASSWORD:-gytt-app-password}"
+      COUCHBASE_BUCKET: "${GYTT_COUCHBASE_BUCKET:-gytt}"
+
+  couchbase:
+    image: couchbase:community-8.0.2
+    container_name: gytt_db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8091:8091"
+    volumes:
+      - couchbase_data:/opt/couchbase/var
+    networks:
+      - private
+    healthcheck:
+      test: "curl -f http://localhost:8091/ui/index.html || exit 1"
+      interval: 5s
+      timeout: 2s
+      retries: 3
+
+  couchbase_bootstrap:
+    image: couchbase:community-8.0.2
+    depends_on:
+      couchbase:
+        condition: service_healthy
+    networks:
+      - private
+    volumes:
+      - ./deploy/bootstrap-couchbase.sh:/bootstrap-couchbase.sh:ro
+    entrypoint: ["/bootstrap-couchbase.sh"]
+    environment:
+      COUCHBASE_HOST: couchbase
+      COUCHBASE_PORT: "8091"
+      ADMIN_USER: "${COUCHBASE_ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${COUCHBASE_ADMIN_PASSWORD:-password}"
+      APP_USER: "${GYTT_COUCHBASE_USERNAME:-gytt-app}"
+      APP_PASSWORD: "${GYTT_COUCHBASE_PASSWORD:-gytt-app-password}"
+      BUCKET_NAME: "${GYTT_COUCHBASE_BUCKET:-gytt}"
+
+volumes:
+  couchbase_data:
+
+networks:
+  private:
+    internal: true

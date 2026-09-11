@@ -1,0 +1,3 @@
+# 0005 — Use a shared Kotlin/JVM capability core
+
+Accepted. The monorepo will build infrastructure-free Kotlin/JVM Tasks and Habits capability modules targeting JVM 17. Each capability exposes one small facade, keeps command and query vertical slices logically separate, and receives storage, query, and transaction ports from its runtime. The server supplies Couchbase adapters; the future offline-first Android client will supply Room or SQLite adapters and use the same behavior locally. CHG-001 builds the shared core but not Android or synchronization. Persistence is state-based CQRS rather than event sourcing.

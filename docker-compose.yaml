@@ -1,0 +1,27 @@
+name: gytt
+
+services:
+  server:
+    container_name: gytt-server
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+  db:
+    container_name: gytt-db
+    image: couchbase:community-8.0.2
+    ports:
+      - "8091-8097:8091-8097"
+      - "9123:9123"
+      - "11207:11207"
+      - "11210:11210"
+      - "11280:11280"
+      - "18091-18097:18091-18097"
+    volumes:
+      - couchbase_data:/opt/couchbase/var
+
+volumes:
+  couchbase_data:

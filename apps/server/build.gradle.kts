@@ -1,24 +1,24 @@
-
 plugins {
-    id("buildlogic.kotlin-application-conventions")
-    alias(ktorLibs.plugins.ktor)
-    alias(libs.plugins.kotlin.serialization)
+    id("kotlin-jvm-conventions")
+    alias(libs.plugins.integration.test)
+    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.ktor)
 }
 
-group = "de.pkolosinski.gytt"
-version = "1.0.0-SNAPSHOT"
-
 application {
-    mainClass = "de.pkolosinski.gytt.MainKt"
+    mainClass = "dev.pkolosinski.gytt.server.MainKt"
 }
 
 dependencies {
-    implementation(ktorLibs.serialization.kotlinx.json)
-    implementation(ktorLibs.server.contentNegotiation)
-    implementation(ktorLibs.server.core)
-    implementation(ktorLibs.server.netty)
-//    implementation(libs.logback.classic)
+    implementation(project(":core"))
 
-    testImplementation(kotlin("test"))
-    testImplementation(ktorLibs.server.testHost)
+    // ktor
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+
+    implementation(libs.logback.classic)
+
+    testImplementation(libs.ktor.server.test.host)
 }

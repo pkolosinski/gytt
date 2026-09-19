@@ -336,6 +336,12 @@ The initial migration creates the bucket configuration, scope, collections, filt
 
 ## Deployment and Configuration
 
+- **Delivery phases:** Task 1 uses a temporary direct-localhost development
+  boundary so the packaged application can be exercised without configuring the
+  external proxy. It still binds only to `127.0.0.1` and does not publish
+  Couchbase ports. HTTPS, Basic Auth, credential stripping, rate limiting, and
+  direct-access prevention are final MVP deployment concerns and remain required
+  before the product is considered complete.
 - One Compose project runs GYTT and Couchbase Server Community as separate containers for CHG-001. The future Android synchronization change adds Sync Gateway as a third container.
 - A multi-stage GYTT image builds the React SPA and Kotlin service; runtime contains only the JRE, server artifact, and compiled local assets.
 - An existing user-operated reverse proxy on the same home-server host, outside Compose, terminates HTTPS with a locally trusted CA, challenges every SPA and `/api/v1` request with HTTP Basic Auth, strips `Authorization`, and forwards authenticated requests to GYTT through the configured loopback-only host socket.
@@ -349,7 +355,7 @@ The initial migration creates the bucket configuration, scope, collections, filt
 
 Configuration:
 
-- `GYTT_PUBLIC_ORIGIN` — exact HTTPS origin accepted for mutations. Missing, non-HTTPS, or malformed values fail startup.
+- `GYTT_PUBLIC_ORIGIN` — exact HTTPS origin accepted for mutations in the authenticated final deployment. The temporary Task 1 local shell may use its direct-localhost origin until the proxy boundary is introduced.
 - `GYTT_COUCHBASE_CONNECTION_STRING` — private Compose address.
 - `GYTT_COUCHBASE_BUCKET` — must be `gytt` for CHG-001.
 - `GYTT_COUCHBASE_USERNAME_FILE` and `GYTT_COUCHBASE_PASSWORD_FILE` — mounted runtime credential files.

@@ -1,6 +1,6 @@
 # Implementation plan
 
-## Task 1: Bootstrap the authenticated application shell
+## Task 1: Bootstrap the local application shell
 
 **Status:** in progress
 
@@ -9,9 +9,9 @@
 **Description:**
 
 
-**Behaviour:** Deliver the first useful end-to-end slice: start the packaged React/Ktor application on a loopback-only Compose binding, serve the static Dashboard greeting and Tasks/Habits links from local assets, and exercise it through the existing co-located HTTPS Basic Auth proxy.
+**Behaviour:** Deliver the first useful end-to-end slice: start the packaged React/Ktor application on a loopback-only Compose binding, serve the static Dashboard greeting and Tasks/Habits links from local assets, and exercise it directly from localhost. Reverse-proxy authentication is deferred until final MVP deployment.
 
-**Implementation action:** Establish the Gradle wrapper and pinned JVM/Kotlin/Ktor and npm/React/Vite builds. Package compiled SPA assets into the server image, add private liveness, exact CSP and trace IDs, and bind the host listener only to `127.0.0.1`. Add a smoke script that builds and starts the application service, requests the local shell and headers, verifies the resolved loopback binding, and stops the test deployment. Document the required external proxy settings without inventing a proxy product, username, password, certificate, or host port. Execute and record the access-boundary checklist against the operator's existing proxy; do not add automated browser or reverse-proxy tests.
+**Implementation action:** Establish the Gradle wrapper and pinned JVM/Kotlin/Ktor and npm/React/Vite builds. Package compiled SPA assets into the server image, add private liveness, exact CSP and trace IDs, and bind the host listener only to `127.0.0.1`. Add a smoke script that builds and starts the application service, requests the local shell and headers, verifies the resolved loopback binding, and stops the test deployment. Document local Docker access without inventing proxy credentials, certificates, or a proxy product. Defer external proxy configuration and its operator acceptance checks to the final MVP deployment; do not add automated browser or reverse-proxy tests.
 
 **Verification command:** `./gradlew :apps:server:test && npm --prefix apps/web ci && npm --prefix apps/web run test -- --run src/app && npm --prefix apps/web run build && ./deploy/smoke-shell.sh`
 
@@ -19,10 +19,9 @@
 
 - The application shell renders the static non-personalized greeting and links to `/tasks` and the default Habits routes from locally compiled assets.
 - The packaged image starts, serves the locally built shell and exact CSP, and is reachable only through its configured loopback host socket.
-- The operator checklist executes and records scenarios "Challenge unauthenticated access", "Serve authenticated access", "Reject an invalid shared credential", "Rate-limit repeated invalid credentials", and "Prevent direct application access".
-- The checklist confirms that Basic credentials never reach GYTT, invalid access has no HTTP fallback, and valid access recovers after the proxy rate-limit interval.
+- The local deployment checklist records the shell, CSP, local asset, and loopback checks.
 - The resolved Compose application port is loopback-only and no unrestricted binding is provided.
-- Proxy, credential, or local-CA failure leaves data untouched; restoring the external boundary restores access.
+- The application is reachable directly at the configured localhost port without requiring the deferred proxy.
 
 ## Task 2: Provision Couchbase and schema readiness
 

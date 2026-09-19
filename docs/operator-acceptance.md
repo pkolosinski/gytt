@@ -1,20 +1,20 @@
 # GYTT operator acceptance checklist
 
-Record the actual proxy, local CA, origin, upstream port, and test date in the
-operator's private deployment notes. Do not add credentials or private
-certificates to this repository.
+Record the local host port and test date in the operator's private deployment
+notes. Do not add credentials or private certificates to this repository.
 
-## Access boundary
+## Deferred access boundary
 
 | Scenario | Result | Evidence / date |
 | --- | --- | --- |
-| Challenge unauthenticated access | [ ] pass [ ] fail | |
-| Serve authenticated access | [ ] pass [ ] fail | |
-| Reject an invalid shared credential | [ ] pass [ ] fail | |
-| Rate-limit repeated invalid credentials | [ ] pass [ ] fail | |
-| Prevent direct application access | [ ] pass [ ] fail | |
+| Challenge unauthenticated access (final MVP) | [ ] deferred | |
+| Serve authenticated access (final MVP) | [ ] deferred | |
+| Reject an invalid shared credential (final MVP) | [ ] deferred | |
+| Rate-limit repeated invalid credentials (final MVP) | [ ] deferred | |
+| Prevent direct application access (final MVP) | [ ] deferred | |
 
-Confirm that:
+These checks are intentionally deferred until the external HTTPS proxy is
+configured for final MVP deployment. At that time, confirm that:
 
 - Basic Auth is challenged by the external HTTPS proxy before GYTT receives a
   request.
@@ -34,7 +34,7 @@ Confirm that:
 | --- | --- | --- |
 | Dashboard greeting and module links render | [ ] pass [ ] fail | |
 | Exact CSP is present | [ ] pass [ ] fail | |
-| Browser uses the configured HTTPS origin | [ ] pass [ ] fail | |
+| Browser reaches the local HTTP origin | [ ] pass [ ] fail | |
 | No remote runtime assets are requested | [ ] pass [ ] fail | |
 | Compose application binding is loopback-only | [ ] pass [ ] fail | |
 | Couchbase has no published host ports | [ ] pass [ ] fail | |

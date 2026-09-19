@@ -14,9 +14,9 @@
 **Implementation subtasks:**
 
 1. **Pin and verify the JVM build**
-   - **Status:** pending
+   - **Status:** done
    - Confirm the Gradle wrapper, JVM target, Kotlin version, Ktor version, and server build task are reproducible.
-   - Verify with the server compilation task only.
+   - Verified with `./gradlew :apps:server:compileKotlin`; the build completed successfully using Gradle 9.7.1 and JVM toolchain 17.
 
 2. **Pin and verify the web build**
    - **Status:** pending

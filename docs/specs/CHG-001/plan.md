@@ -19,9 +19,9 @@
    - Verified with `./gradlew :apps:server:compileKotlin`; the build completed successfully using Gradle 9.7.1 and JVM toolchain 17.
 
 2. **Pin and verify the web build**
-   - **Status:** pending
-   - Confirm the committed `apps/web` lockfile installs with the repository's declared package manager and that the Vite production build succeeds.
-   - Verify with the web dependency-install and build commands only.
+   - **Status:** done
+   - Confirmed the committed `apps/web` lockfile installs with pnpm 12.4.2 and that the Vite production build succeeds.
+   - Verified with `corepack pnpm --dir apps/web install --frozen-lockfile && corepack pnpm --dir apps/web build`.
 
 3. **Replace the starter Dashboard content**
    - **Status:** pending

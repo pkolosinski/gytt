@@ -24,9 +24,9 @@
    - Verified with `corepack pnpm --dir apps/web install --frozen-lockfile && corepack pnpm --dir apps/web build`.
 
 3. **Replace the starter Dashboard content**
-   - **Status:** pending
-   - Replace the Vite demo with the static non-personalized greeting and local links to `/tasks` and the default Habits routes.
-   - Keep the change limited to the Dashboard shell and its local styles/assets.
+   - **Status:** done
+   - Replaced the Vite demo with the static non-personalized greeting and local links to `/tasks` and `/habits/day`.
+   - Kept the change limited to the Dashboard shell and its local styles.
 
 4. **Add placeholder Tasks and Habits routes**
    - **Status:** pending

@@ -26,7 +26,7 @@
 3. **Replace the starter Dashboard content**
    - **Status:** done
    - Replaced the Vite demo with the static non-personalized greeting and local links to `/tasks` and `/habits/day`.
-   - Kept the change limited to the Dashboard shell and its local styles.
+   - Kept the change limited to the Dashboard shell and its Tailwind utility classes.
 
 4. **Add placeholder Tasks and Habits routes**
    - **Status:** pending

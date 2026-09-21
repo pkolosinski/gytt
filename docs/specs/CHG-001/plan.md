@@ -29,8 +29,8 @@
    - Kept the change limited to the Dashboard shell and its Tailwind utility classes.
 
 4. **Add placeholder Tasks and Habits routes**
-   - **Status:** pending
-   - Add route entries for `/tasks` and the default Habits routes so every Dashboard link resolves to a local SPA screen.
+   - **Status:** done
+   - Added local placeholder screens for `/tasks`, `/habits/day`, `/habits/week`, and `/habits/month` so the Dashboard and default period routes resolve within the SPA.
    - Do not implement task or habit behavior in this subtask.
 
 5. **Add the server liveness endpoint**

@@ -1,107 +1,50 @@
-import { useState } from 'react';
+import { Link } from 'react-router';
 
-import heroImg from '../../../assets/hero.png';
-import reactLogo from '../../../assets/react.svg';
-import viteLogo from '../../../assets/vite.svg';
-
-import './DashboardContent.css';
+const modules = [
+    {
+        description: 'Plan, organize, and complete your daily work.',
+        href: '/tasks',
+        title: 'Tasks',
+    },
+    {
+        description: 'Build consistency with daily, weekly, and monthly habits.',
+        href: '/habits/day',
+        title: 'Habits',
+    },
+];
 
 export function DashboardContent() {
-    const [count, setCount] = useState(0);
-
     return (
-        <>
-            <section id="center">
-                <div className="hero">
-                    <img src={heroImg} className="base" width="170" height="179" alt="" />
-                    <img src={reactLogo} className="framework" alt="React logo" />
-                    <img src={viteLogo} className="vite" alt="Vite logo" />
-                </div>
-                <div>
-                    <h1>Get started</h1>
-                    <p>
-                        Edit <code>src/features/dashboard/components/DashboardContent.tsx</code> and
-                        save to test <code>HMR</code>
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    className="counter"
-                    onClick={() => setCount((count) => count + 1)}
-                >
-                    Count is {count}
-                </button>
-            </section>
+        <main className="flex flex-1 flex-col justify-center gap-10 px-5 py-10 text-left sm:gap-16 sm:px-12 sm:py-16">
+            <header className="max-w-[680px]">
+                <p className="text-xs font-bold tracking-[0.12em] text-accent uppercase">Get Your Things Together</p>
+                <h1 className="my-4">Make today count.</h1>
+                <p className="max-w-[540px] text-[1.15rem]">
+                    A calm place for the things you want to do and keep doing.
+                </p>
+            </header>
 
-            <div className="ticks"></div>
-
-            <section id="next-steps">
-                <div id="docs">
-                    <svg className="icon" role="presentation" aria-hidden="true">
-                        <use href="/icons.svg#documentation-icon"></use>
-                    </svg>
-                    <h2>Documentation</h2>
-                    <p>Your questions, answered</p>
-                    <ul>
-                        <li>
-                            <a href="https://vite.dev/" target="_blank">
-                                <img className="logo" src={viteLogo} alt="" />
-                                Explore Vite
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://react.dev/" target="_blank">
-                                <img className="button-icon" src={reactLogo} alt="" />
-                                Learn more
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="social">
-                    <svg className="icon" role="presentation" aria-hidden="true">
-                        <use href="/icons.svg#social-icon"></use>
-                    </svg>
-                    <h2>Connect with us</h2>
-                    <p>Join the Vite community</p>
-                    <ul>
-                        <li>
-                            <a href="https://github.com/vitejs/vite" target="_blank">
-                                <svg className="button-icon" role="presentation" aria-hidden="true">
-                                    <use href="/icons.svg#github-icon"></use>
-                                </svg>
-                                GitHub
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://chat.vite.dev/" target="_blank">
-                                <svg className="button-icon" role="presentation" aria-hidden="true">
-                                    <use href="/icons.svg#discord-icon"></use>
-                                </svg>
-                                Discord
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://x.com/vite_js" target="_blank">
-                                <svg className="button-icon" role="presentation" aria-hidden="true">
-                                    <use href="/icons.svg#x-icon"></use>
-                                </svg>
-                                X.com
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                                <svg className="button-icon" role="presentation" aria-hidden="true">
-                                    <use href="/icons.svg#bluesky-icon"></use>
-                                </svg>
-                                Bluesky
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </section>
-
-            <div className="ticks"></div>
-            <section id="spacer"></section>
-        </>
+            <nav
+                aria-label="GYTT modules"
+                className="grid max-w-[760px] grid-cols-1 gap-4 sm:grid-cols-2"
+            >
+                {modules.map((module) => (
+                    <Link
+                        className="group relative flex min-h-[150px] flex-col gap-3 rounded-xl border border-border p-6 text-foreground no-underline transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-accent hover:shadow-lg focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                        key={module.href}
+                        to={module.href}
+                    >
+                        <span className="font-heading text-2xl text-foreground">{module.title}</span>
+                        <span>{module.description}</span>
+                        <span
+                            aria-hidden="true"
+                            className="absolute right-6 bottom-5 text-2xl text-accent transition-transform group-hover:translate-x-1"
+                        >
+                            →
+                        </span>
+                    </Link>
+                ))}
+            </nav>
+        </main>
     );
 }

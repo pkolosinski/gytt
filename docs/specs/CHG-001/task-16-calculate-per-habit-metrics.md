@@ -1,18 +1,10 @@
 # Task 16: Calculate per-Habit metrics
 
-
 **Status:** pending
 
 **Depends on:** Task 15
 
-**Description:**
-
-
-**Behaviour:** Report Completion rate over expected occurrences and uncapped Target attainment for one numeric Habit, while returning the specified null reason when target attainment is not meaningful.
-
-**Implementation action:** Enumerate expected occurrences across immutable definitions and archive dates, count fully met targets, sum compatible numeric progress/targets, preserve units, cap the range at five years, and use a bounded parameterized `REQUEST_PLUS` query. Add hostile bound-value integration coverage with this first metrics query. Render the metrics in the existing details surface without introducing mixed-Habit aggregation.
-
-**Verification command:** `./gradlew :core:habits:test :apps:server:test :apps:server:integrationTest openApiValidate && npm --prefix apps/web ci && npm --prefix apps/web run test -- --run MetricSummary`
+**Description:** Report Completion rate over expected occurrences and uncapped Target attainment for one numeric Habit, while returning the specified null reason when target attainment is not meaningful. Enumerate expected occurrences across immutable definitions and archive dates, count fully met targets, sum compatible numeric progress/targets, preserve units, cap the range at five years, and use a bounded parameterized `REQUEST_PLUS` query. Add hostile bound-value integration coverage with this first metrics query. Render the metrics in the existing details surface without introducing mixed-Habit aggregation.
 
 **Acceptance Criteria:**
 

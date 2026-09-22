@@ -1,18 +1,10 @@
 # Task 5: Move Anytime tasks through effective-dated status
 
-
 **Status:** pending
 
 **Depends on:** Task 4
 
-**Description:**
-
-
-**Behaviour:** Move an Anytime task in either direction among To do, In progress, and Completed by pointer or keyboard, preserve historical status, hide it after completion, and allow a later transition to reopen it.
-
-**Implementation action:** Add monotonic transition sequences, effective-date resolution, start-date validation, desired-state idempotency, revision/CAS writes, source-owned summary updates, and operation-specific unambiguous, ambiguous-timeout, read-back, and storage-outage tests. Add pointer movement, the equivalent keyboard Move action, visible focus, announcements, and affected-control-only mutation state.
-
-**Verification command:** `./gradlew :core:tasks:test :apps:server:test :apps:server:integrationTest openApiValidate && npm --prefix apps/web ci && npm --prefix apps/web run test -- --run src/tasks`
+**Description:** Move an Anytime task in either direction among To do, In progress, and Completed by pointer or keyboard, preserve historical status, hide it after completion, and allow a later transition to reopen it. Add monotonic transition sequences, effective-date resolution, start-date validation, desired-state idempotency, revision/CAS writes, source-owned summary updates, and operation-specific unambiguous, ambiguous-timeout, read-back, and storage-outage tests. Add pointer movement, the equivalent keyboard Move action, visible focus, announcements, and affected-control-only mutation state.
 
 **Acceptance Criteria:**
 

@@ -1,18 +1,10 @@
 # Task 8: Complete the standard Task modal lifecycle
 
-
 **Status:** pending
 
 **Depends on:** Task 6, Task 7
 
-**Description:**
-
-
-**Behaviour:** Use one modal for standard Task details, create/edit, copy, and deletion; require a named confirmation before permanent deletion; preserve deleted IDs without deleted personal content; and surface stale edits by loading the newer value even when it moved off the selected board.
-
-**Implementation action:** Complete update constraints and the Task-by-ID reload path. Implement versioned deletion as replacement with `TaskConsumedIdReceipt`, exclude receipts from all reads, reject later creation with the consumed ID, and prove ambiguous deletion only by receipt read-back. Add delayed-create and repeated-delete integration tests, OpenAPI mappings, conflict reload state, focus restoration, field-associated errors, and affected-control-only disabling. Keep a single modal extension point for the later conversion form rather than creating a second Task details surface.
-
-**Verification command:** `./gradlew :core:tasks:test :apps:server:test :apps:server:integrationTest openApiValidate && npm --prefix apps/web ci && npm --prefix apps/web run test -- --run src/tasks`
+**Description:** Use one modal for standard Task details, create/edit, copy, and deletion; require a named confirmation before permanent deletion; preserve deleted IDs without deleted personal content; and surface stale edits by loading the newer value even when it moved off the selected board. Complete update constraints and the Task-by-ID reload path. Implement versioned deletion as replacement with `TaskConsumedIdReceipt`, exclude receipts from all reads, reject later creation with the consumed ID, and prove ambiguous deletion only by receipt read-back. Add delayed-create and repeated-delete integration tests, OpenAPI mappings, conflict reload state, focus restoration, field-associated errors, and affected-control-only disabling. Keep a single modal extension point for the later conversion form rather than creating a second Task details surface.
 
 **Acceptance Criteria:**
 

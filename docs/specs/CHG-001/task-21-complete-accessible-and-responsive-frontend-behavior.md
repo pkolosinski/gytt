@@ -1,18 +1,10 @@
 # Task 21: Complete accessible and responsive frontend behavior
 
-
 **Status:** pending
 
 **Depends on:** Task 16, Task 17, Task 18
 
-**Description:**
-
-
-**Behaviour:** Meet the specified keyboard, focus, semantics, labels/errors, announcements, contrast, non-color progress, zoom, phone Tasks board, Dashboard layout, and responsive Habit details behavior. Automated coverage remains at Vitest/Testing Library; real-browser and viewport checks remain operator acceptance.
-
-**Implementation action:** Complete semantic structure and CSS containment, snap-aligned horizontal Task columns, focus return for modal/panel surfaces, visible focus, status announcements, field associations, keyboard Completed section, route-selected panel/full-page rendering, and non-color-only states. Extend the operator checklist for supported browsers, phone width, and 200% zoom without adding Playwright or another browser suite.
-
-**Verification command:** `npm --prefix apps/web ci && npm --prefix apps/web run test && npm --prefix apps/web run build`
+**Description:** Meet the specified keyboard, focus, semantics, labels/errors, announcements, contrast, non-color progress, zoom, phone Tasks board, Dashboard layout, and responsive Habit details behavior. Automated coverage remains at Vitest/Testing Library; real-browser and viewport checks remain operator acceptance. Complete semantic structure and CSS containment, snap-aligned horizontal Task columns, focus return for modal/panel surfaces, visible focus, status announcements, field associations, keyboard Completed section, route-selected panel/full-page rendering, and non-color-only states. Extend the operator checklist for supported browsers, phone width, and 200% zoom without adding Playwright or another browser suite.
 
 **Acceptance Criteria:**
 

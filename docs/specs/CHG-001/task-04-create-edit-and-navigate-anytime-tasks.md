@@ -1,18 +1,10 @@
 # Task 4: Create, edit, and navigate Anytime tasks
 
-
 **Status:** pending
 
 **Depends on:** Task 3
 
-**Description:**
-
-
-**Behaviour:** Open Tasks on device Today, navigate exact LocalDates, preserve the three-column empty structure, create an Anytime task with a default or future start, edit its fields, read it directly by ID for conflict recovery, and carry it through its active interval. The board request composes the Tasks result with the public Habits due-day query behind the bounded composition-revision fence and fails as one unit.
-
-**Implementation action:** Add canonical caller-ID validation, deterministic document keys, aggregate revisions, To do initialization, Anytime visibility policy, update constraints, `TaskRecordView`, source-owned summary updates, and parameterized board adapter. Establish the common bounded mutation executor and operation-specific ambiguity/outage tests with this first real mutation. Implement the board coordinator that reads the initial composition revision around both capability queries and retries as specified. Add body limits, safe errors, shared storage/indeterminate-result UI, the OpenAPI create/update/by-ID/composite-read contract, and generated client. Build the date routes, navigation, stable empty board, unified modal shell, discriminated Anytime editor, and literal-text rendering tests. Apply Origin validation before mutation body processing and exact postcondition read-back after ambiguous durable writes.
-
-**Verification command:** `./gradlew :core:tasks:test :core:habits:test :apps:server:test :apps:server:integrationTest openApiValidate && npm --prefix apps/web ci && npm --prefix apps/web run test -- --run src/tasks`
+**Description:** Open Tasks on device Today, navigate exact LocalDates, preserve the three-column empty structure, create an Anytime task with a default or future start, edit its fields, read it directly by ID for conflict recovery, and carry it through its active interval. The board request composes the Tasks result with the public Habits due-day query behind the bounded composition-revision fence and fails as one unit. Add canonical caller-ID validation, deterministic document keys, aggregate revisions, To do initialization, Anytime visibility policy, update constraints, `TaskRecordView`, source-owned summary updates, and parameterized board adapter. Establish the common bounded mutation executor and operation-specific ambiguity/outage tests with this first real mutation. Implement the board coordinator that reads the initial composition revision around both capability queries and retries as specified. Add body limits, safe errors, shared storage/indeterminate-result UI, the OpenAPI create/update/by-ID/composite-read contract, and generated client. Build the date routes, navigation, stable empty board, unified modal shell, discriminated Anytime editor, and literal-text rendering tests. Apply Origin validation before mutation body processing and exact postcondition read-back after ambiguous durable writes.
 
 **Acceptance Criteria:**
 

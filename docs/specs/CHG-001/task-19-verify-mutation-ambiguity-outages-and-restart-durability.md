@@ -1,18 +1,10 @@
 # Task 19: Verify mutation ambiguity, outages, and restart durability
 
-
 **Status:** pending
 
 **Depends on:** Task 15, Task 18
 
-**Description:**
-
-
-**Behaviour:** Run cross-family regression coverage for already-implemented ambiguity and outage handling, and prove that browser, service, and database restart retain all saved Tasks, Habits, progress, and history while discarding only unsaved browser drafts.
-
-**Implementation action:** Exercise every mutation family's existing postcondition reader through a common regression matrix without adding missing production behavior here. Verify exact error/trace/redaction behavior, dispatched timeout handling, deterministic-ID reuse, and the shared retry/indeterminate UI already introduced by the mutation slices. Restart the browser harness, Ktor service, and Testcontainers Couchbase node against the same test volume and verify all source-of-truth documents and projections.
-
-**Verification command:** `./gradlew :apps:server:integrationTest --tests 'gytt.server.reliability.*' && npm --prefix apps/web ci && npm --prefix apps/web run test -- --run src/app`
+**Description:** Run cross-family regression coverage for already-implemented ambiguity and outage handling, and prove that browser, service, and database restart retain all saved Tasks, Habits, progress, and history while discarding only unsaved browser drafts. Exercise every mutation family's existing postcondition reader through a common regression matrix without adding missing production behavior here. Verify exact error/trace/redaction behavior, dispatched timeout handling, deterministic-ID reuse, and the shared retry/indeterminate UI already introduced by the mutation slices. Restart the browser harness, Ktor service, and Testcontainers Couchbase node against the same test volume and verify all source-of-truth documents and projections.
 
 **Acceptance Criteria:**
 

@@ -1,5 +1,7 @@
 # Web application
 
+- Follow the repository's UI feature sequence in
+  `docs/agent-guidance/feature-workflow.md`.
 - Keep TypeScript strict; do not weaken types or use casts to bypass errors.
 - Prefer `type` declarations; use `interface` for component props.
 - Do not use default exports; use named exports.

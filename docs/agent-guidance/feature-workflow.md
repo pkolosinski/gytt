@@ -5,6 +5,9 @@
 - For feature or behavior changes, read the relevant
   `docs/specs/<change>/product.md`, `tech.md`, and the `plan.md` task index
   before coding.
+- For UI-related features, deliver in this order: build the view with mock
+  data, obtain UI acceptance, add the OpenAPI contract, connect the frontend
+  to that contract, and implement the backend last.
 - Implement the current task files and keep their statuses current using the
   `pending`, `in progress`, and `done`.
 - Keep one change under `docs/specs/<change>/`; use its product, tech, plan

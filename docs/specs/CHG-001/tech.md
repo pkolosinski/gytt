@@ -8,7 +8,7 @@ Verified directly against the repository on 2026-09-04.
 - No application source, build configuration, dependency manifest, API schema, database schema, migration, test, deployment configuration, or operational script exists.
 - No Dashboard, Tasks, Habits, access boundary, persistence, contract, or web behavior exists.
 - ADRs 0001 through 0007 record accepted greenfield decisions; no implementation predates them.
-- `docs/specs/CHG-001/plan.md` exists as a downstream draft produced from the earlier technical specification and must be regenerated after this revision.
+- `docs/specs/CHG-001/plan.md` is the task index, with one linked task file per implementation task; regenerate the index and affected task files after this revision.
 - The repository is not initialized as a Git repository.
 
 ## Architecture Delta (required)

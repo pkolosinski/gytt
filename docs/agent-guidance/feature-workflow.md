@@ -3,12 +3,14 @@
 - Treat project documentation as the source of truth for product behavior,
   architecture, operations, and delivery constraints.
 - For feature or behavior changes, read the relevant
-  `docs/specs/<change>/product.md`, `tech.md`, and `plan.md` before coding.
-- Implement the current plan and keep its tasks current using the statuses
+  `docs/specs/<change>/product.md`, `tech.md`, and the `plan.md` task index
+  before coding.
+- Implement the current task files and keep their statuses current using the
   `pending`, `in progress`, and `done`.
-- Keep one change under `docs/specs/<change>/`; use its product, tech, and
-  plan documents.
-- Keep plan tasks small, explicit, and dependency-aware.
+- Keep one change under `docs/specs/<change>/`; use its product, tech, plan
+  index, and one file per task.
+- Keep task files small, explicit, and dependency-aware; keep the plan index
+  limited to task links, statuses, and dependencies.
 - Update related documentation when behavior, boundaries, deployment, or
   acceptance criteria change.
 - Use the templates for new product, technical, and plan documents.

@@ -13,7 +13,7 @@ GYTT is a private, single-user, local-first life-organization product for daily 
 
 - Kotlin/JVM uses the Gradle wrapper (`./gradlew`); run affected `test` and `ktlintCheck` tasks.
 - The web app uses `pnpm` from `apps/web` rather than npm; run `pnpm build` and `pnpm lint` there.
-- For feature or behavior work, read the relevant `docs/specs/<change>/product.md`, `tech.md`, and `plan.md` before coding, then keep the plan status current.
+- For feature or behavior work, read the relevant `docs/specs/<change>/product.md`, `tech.md`, and the `plan.md` task index before coding, then keep the linked task file status current.
 
 ## Detailed guidance
 

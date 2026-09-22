@@ -1,12 +1,11 @@
-# Implementation plan
+# Implementation plan index
 
-## Task [number]: [title]
+Keep one task per file and list every task in this index.
 
-**Status:** (pending | in progress | done)
+| Number | Task | Status | Dependencies |
+| ---: | --- | --- | --- |
+| [number] | [title](task-[number]-[short-title].md) | (pending \| in progress \| done) | [linked task files] |
 
-**Depends on:**
-
-**Description:**
-
-**Acceptance Criteria:**
+Each task file should contain the task title, status, dependencies,
+description, and acceptance criteria.
 

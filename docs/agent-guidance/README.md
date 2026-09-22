@@ -20,7 +20,8 @@ docs/
 │   └── <change>/
 │       ├── product.md
 │       ├── tech.md
-│       └── plan.md
+│       ├── plan.md
+│       └── task-NN-short-title.md
 ├── operations.md
 └── operator-acceptance.md
 ```

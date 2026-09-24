@@ -37,6 +37,15 @@ services:
         condition: service_healthy
     networks:
       - private
+    volumes:
+      - ./deploy/bootstrap-couchbase.sh:/bootstrap-couchbase.sh:ro
+    entrypoint: ["/bin/bash", "-c", "chmod +x /bootstrap-couchbase.sh && /bootstrap-couchbase.sh"]
+    environment:
+      - COUCHBASE_HOST=couchbase
+      - COUCHBASE_PORT=8091
+      - ADMIN_USER=Administrator
+      - ADMIN_PASSWORD=password
+      - BUCKET_NAME=gytt
 
 volumes:
   couchbase_data:

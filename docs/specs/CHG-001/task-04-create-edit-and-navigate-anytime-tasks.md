@@ -4,22 +4,22 @@
 
 **Depends on:** Task 3
 
-**Description:** Open Tasks on device Today, navigate exact LocalDates, preserve the three-column empty structure, create an Anytime task with a default or future start, edit its fields, read it directly by ID for conflict recovery, and carry it through its active interval. The board request composes the Tasks result with the public Habits due-day query behind the bounded composition-revision fence and fails as one unit. Add canonical caller-ID validation, deterministic document keys, aggregate revisions, To do initialization, Anytime visibility policy, update constraints, `TaskRecordView`, source-owned summary updates, and parameterized board adapter. Establish the common bounded mutation executor and operation-specific ambiguity/outage tests with this first real mutation. Implement the board coordinator that reads the initial composition revision around both capability queries and retries as specified. Add body limits, safe errors, shared storage/indeterminate-result UI, the OpenAPI create/update/by-ID/composite-read contract, and generated client. Build the date routes, navigation, stable empty board, unified modal shell, discriminated Anytime editor, and literal-text rendering tests. Apply Origin validation before mutation body processing and exact postcondition read-back after ambiguous durable writes.
+**Description:** Deliver the Tasks UI before its API and backend: first build and obtain acceptance for the date routes, navigation, stable three-column board, unified modal shell, discriminated Anytime editor, and conflict/error states with mock data. Then define the OpenAPI create/update/by-ID/composite-read contract, generate the client, and connect the accepted UI to that contract. Implement the capability policies, persistence adapters, mutation executor, composite-board coordinator, and Ktor routes last, including canonical caller-ID validation, deterministic keys, revisions, To do initialization, Anytime visibility, update constraints, `TaskRecordView`, bounded composition-revision fencing with the public Habits due-day query, body limits, Origin-before-body validation, safe errors, exact postcondition read-back, and operation-specific ambiguity/outage tests. Dashboard summary reads are not part of this task; they are delivered in Tasks 24 and 17.
 
 Implementation subtasks:
 
-1. [ ] Define canonical Task IDs, deterministic keys, the Anytime aggregate, To do initialization, revisions, validation, visibility policy, `TaskRecordView`, and in-memory core tests.
-2. [ ] Define the create, update, by-ID, and date-query facade/port contracts, including same-ID create idempotency, `ID_REUSED`, version conflicts, and unchanged-state tests.
-3. [ ] Implement the parameterized Tasks board adapter and source-owned summary update with `REQUEST_PLUS`, including hostile bound-value and immediate-read coverage.
-4. [ ] Implement the bounded mutation executor for Task create/update, including operation-specific unambiguous failure, dispatched-timeout, exact read-back, `COMMIT_UNKNOWN`, and storage-outage tests.
-5. [ ] Implement the board-composition coordinator around the Tasks and Habits queries, proving stable reads, whole-board failure, and bounded revision-churn exhaustion.
-6. [ ] Add canonical-ID rejection, Origin-before-body validation, body limits, safe problems, and the create/update/by-ID/composite-read Ktor routes with focused HTTP tests.
-7. [ ] Update OpenAPI for the Task operations and board union, verify the contract, and regenerate the TypeScript client.
-8. [ ] Implement `/tasks` Today redirection, exact `/tasks/:date` navigation, malformed-date handling, and the stable three-column empty board.
-9. [ ] Implement the unified modal shell and Anytime editor with default/future start dates, draft-preserving validation, and create behavior.
-10. [ ] Add Anytime card/details editing and direct by-ID conflict reload while preserving unsaved drafts and reloading changed board visibility.
-11. [ ] Add component tests for active-interval carry-forward, default/future creation, editing, empty structure, exact date navigation, and whole-board failure.
-12. [ ] Add literal-text rendering tests for the first Task card and modal surfaces and verify rejected mutations create no Task.
+1. [ ] Build `/tasks` Today redirection, exact `/tasks/:date` navigation, malformed-date state, and the stable three-column board with mock data.
+2. [ ] Build the unified modal shell and Anytime editor with mock data, default/future start dates, draft-preserving validation, and create/edit states.
+3. [ ] Build Anytime card/details and by-ID conflict-reload states with mock data, preserving drafts and representing changed board visibility.
+4. [ ] Add component tests for the mocked board, navigation, editor, carry-forward, conflict, and whole-board failure states; obtain UI acceptance before defining the API contract.
+5. [ ] Define and verify the OpenAPI create/update/by-ID/composite-read contract and board union, then regenerate the TypeScript client.
+6. [ ] Connect the accepted routes, board, editor, and conflict/error states to the generated client contract.
+7. [ ] Define canonical Task IDs, deterministic keys, the Anytime aggregate, To do initialization, revisions, validation, visibility policy, `TaskRecordView`, and in-memory core tests.
+8. [ ] Define create, update, by-ID, and date-query facade/port contracts, including same-ID idempotency, `ID_REUSED`, version conflicts, and unchanged-state rules.
+9. [ ] Implement the parameterized Tasks board adapter and composite-board coordinator over Tasks and Habits queries, proving immediate reads, hostile-value binding, stable reads, whole-board failure, and bounded revision-churn exhaustion.
+10. [ ] Implement the bounded Task create/update mutation executor with operation-specific unambiguous failure, dispatched timeout, exact read-back, `COMMIT_UNKNOWN`, and storage-outage tests.
+11. [ ] Add canonical-ID rejection, Origin-before-body validation, body limits, safe problems, and the create/update/by-ID/composite-read Ktor routes with focused HTTP tests.
+12. [ ] Add persistence and end-to-end coverage proving acknowledged writes, ambiguous read-back, rejected mutations, and board behavior satisfy the accepted UI contract.
 
 **Acceptance Criteria:**
 
@@ -31,3 +31,5 @@ Implementation subtasks:
 - Identical same-ID creation returns the existing Task; different content returns `409 ID_REUSED`.
 - Rejected validation or a version conflict leaves stored state unchanged and preserves the editor draft.
 - Scenario "Render user content as text" passes for the first Task card and modal surfaces.
+- The Tasks UI is accepted using mock data before the OpenAPI contract and backend implementation begin.
+- Dashboard summary reads and Dashboard card behavior remain out of scope for this task.

@@ -15,8 +15,8 @@ Implementation subtasks:
 5. [ ] Complete keyboard-expandable Completed sections and non-color-only progress/status presentation.
 6. [ ] Implement the bounded horizontally scrollable, snap-aligned three-column phone Tasks board while keeping the page shell fixed.
 7. [ ] Complete route-selected wide-panel/narrow-full-page Habit details layout without changing route semantics.
-9. [ ] Add Testing Library/component assertions for supported layouts, containment, focus, labels/errors, announcements, and keyboard behavior.
-10. [ ] Extend the operator checklist for current/previous supported browsers, phone width, contrast, focus, keyboard use, and 200% zoom without adding a browser suite.
+8. [ ] Add Testing Library/component assertions for supported layouts, containment, focus, labels/errors, announcements, and keyboard behavior.
+9. [ ] Extend the operator checklist for current/previous supported browsers, phone width, contrast, focus, keyboard use, and 200% zoom without adding a browser suite.
 
 **Acceptance Criteria:**
 

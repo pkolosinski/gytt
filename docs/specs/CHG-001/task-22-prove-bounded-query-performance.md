@@ -4,7 +4,7 @@
 
 **Depends on:** Task 16, Task 17, Task 19
 
-**Description:** Keep each source-owned Dashboard request and one date/period query within the specified 500 ms p95 bound on the home-LAN test profile while using `REQUEST_PLUS`, 10,000 Tasks, 100 Habits, and five years of progress. Add deterministic local scale fixtures, warm-up and measured query runs, percentile reporting, and bounded metrics-range coverage. Tune only the specified filtered secondary indexes and bounded read models; do not add projections, a Dashboard module, primary indexes, or remote infrastructure. If an index must change after the initial migration has been recorded, add a new checksum-verified forward migration with image schema-range and backup/restore compatibility tests; never edit an applied migration.
+**Description:** After Dashboard implementation, verify each source-owned Dashboard summary request and one date/period query against the specified 500 ms p95 bound on the home-LAN test profile using `REQUEST_PLUS`, 10,000 Tasks, 100 Habits, and five years of progress. Add deterministic local scale fixtures, warm-up and measured query runs, percentile reporting, and bounded metrics-range coverage. This task verifies query behavior introduced in the owning Tasks and Habits slices; it does not defer first implementation of bounded queries or required indexes. Tune only the specified filtered secondary indexes and bounded read models; do not add projections, a Dashboard module, primary indexes, or remote infrastructure. If an index must change after the initial migration has been recorded, add a new checksum-verified forward migration with image schema-range and backup/restore compatibility tests; never edit an applied migration.
 
 Implementation subtasks:
 

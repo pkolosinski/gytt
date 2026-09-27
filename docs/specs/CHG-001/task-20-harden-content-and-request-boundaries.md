@@ -2,9 +2,9 @@
 
 **Status:** pending
 
-**Depends on:** Task 16, Task 17, Task 18
+**Depends on:** Task 16, Task 17, Task 18, Task 19, Task 21, Task 25
 
-**Description:** Regress every already-implemented content and request-boundary control across the complete application: literal text rendering, exact CSP and Origin behavior, bound SQL++ values, bounded requests, safe errors, and local-only runtime assets. Audit all rendering, adapter, and error call sites against the controls implemented in their owning slices. Add only missing regression cases; do not defer first implementation of sanitization, parameter binding, body/field/range limits, Origin enforcement, or safe problem details to this task. Inspect built asset references as part of the component/build verification; runtime network confinement remains an operator acceptance item.
+**Description:** After Tasks, Habits, and Dashboard feature work is complete, regress the already-implemented content and request-boundary controls across the application: literal text rendering, exact CSP and Origin behavior, bound SQL++ values, bounded requests, safe errors, and local-only runtime assets. Audit all rendering, adapter, and error call sites against the controls implemented in their owning slices. Add only missing regression cases; do not defer first implementation of sanitization, parameter binding, body/field/range limits, Origin enforcement, or safe problem details to this task. Inspect built asset references as part of component/build verification; runtime network confinement remains an operator acceptance item.
 
 Implementation subtasks:
 

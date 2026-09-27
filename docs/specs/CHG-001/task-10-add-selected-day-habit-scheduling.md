@@ -4,20 +4,23 @@
 
 **Depends on:** Task 9
 
-**Description:** Create a Habit on unique selected ISO weekdays, project it only on due days, and expose each due occurrence through the same Habits day list and Tasks board behavior as a daily Habit. Add selected-weekday validation and applicability to the core schedule policy, OpenAPI union, persistence mapping, editor, summary, and due-day query. Reuse the existing daily occurrence identity, binary progress transaction, and Habit card rather than adding a new path.
+**Description:** Extend the Habit editor and day/Tasks mock views with selected-weekday scheduling, due/non-due presentation, and field-associated errors; obtain UI acceptance before defining the contract. Update the schedule OpenAPI union and generated client, then connect the accepted controls and views. Implement schedule validation/applicability, persistence mapping, and due-day/period query changes last. Reuse the daily occurrence identity, binary progress transaction, and Habit card; Dashboard summary behavior remains deferred to Tasks 24 and 17.
 
 Implementation subtasks:
 
-1. [ ] Add selected-days schedule validation for unique ISO weekdays `1..7` stored and returned Monday first.
-2. [ ] Add core applicability tests proving selected-day occurrences exist only on due LocalDates and reuse the daily occurrence identity.
-3. [ ] Extend persistence and OpenAPI schedule unions for selected days without changing daily mappings.
-4. [ ] Extend the Habits period, summary, and due-day adapters so non-due dates produce no occurrence, count, card, or progress identity.
-5. [ ] Extend the Habit editor with selected-weekday controls and field-associated validation.
-6. [ ] Add integration/component regression coverage for due and non-due Habits and Tasks views while keeping all existing daily behavior green.
+1. [ ] Extend the Habit editor and day/Tasks mock views with selected-weekday controls, due/non-due states, and field-associated errors.
+2. [ ] Add mocked component coverage for due/non-due days and obtain UI acceptance before changing the OpenAPI contract.
+3. [ ] Extend and verify the OpenAPI schedule union and regenerate the client without changing daily mappings.
+4. [ ] Connect accepted selected-day controls and views to the generated client contract.
+5. [ ] Add schedule validation for unique ISO weekdays `1..7`, stored and returned Monday first.
+6. [ ] Add core applicability tests proving occurrences exist only on due LocalDates and reuse daily occurrence identity.
+7. [ ] Extend persistence and Habits period/due-day adapters so non-due dates produce no occurrence, card, or progress identity; Dashboard summary adapters remain in Tasks 17/24.
+8. [ ] Add backend and end-to-end regressions for due/non-due behavior while keeping daily behavior green.
 
 **Acceptance Criteria:**
 
 - Selected weekdays are unique integers `1..7` ordered Monday first.
 - A selected-day occurrence appears in Tasks and Habits only on a due LocalDate.
-- Non-due days do not create a card, summary count, or progress identity.
+- Non-due days do not create a Habit card or progress identity.
 - Existing daily Habit behavior remains unchanged.
+- The selected-day UI is accepted with mock data before contract and backend changes begin.

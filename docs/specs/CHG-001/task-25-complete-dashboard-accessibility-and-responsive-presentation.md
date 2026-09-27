@@ -8,9 +8,9 @@
 
 Implementation subtasks:
 
-1. [ ] Complete Dashboard headings, landmarks, semantics, accessible names, and status announcements.
-2. [ ] Implement Dashboard phone/desktop containment with no horizontal page overflow.
-3. [ ] Verify Dashboard summary cards and independent retry controls are accessible by keyboard, with visible focus and appropriate focus behavior.
+1. [ ] Refine the Dashboard presentation with mock data to complete headings, landmarks, semantics, accessible names, status announcements, and phone/desktop containment.
+2. [ ] Obtain UI acceptance for the Dashboard accessibility and responsive presentation before finalizing its component assertions.
+3. [ ] Verify summary cards and independent retry controls are accessible by keyboard, with visible focus and appropriate focus behavior.
 4. [ ] Add Testing Library assertions for Dashboard accessibility, containment, focus, and supported responsive layouts.
 5. [ ] Extend the operator checklist for Dashboard use across supported browsers, phone width, contrast, keyboard use, and 200% zoom.
 

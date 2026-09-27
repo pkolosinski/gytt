@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { Link } from 'react-router';
 
 import { buttonVariants } from '@/shared/generated/shadcn/ui/button.tsx';
@@ -28,10 +29,10 @@ export function TaskDateNotFound({ value }: TaskDateNotFoundProps) {
                         </CardDescription>
                     </CardHeader>
                     <CardFooter className="flex-wrap justify-end gap-2">
-                        <Link className={buttonVariants({ variant: 'outline' })} to="/">
+                        <Link className={cn(buttonVariants({ variant: 'outline' }))} to="/">
                             Dashboard
                         </Link>
-                        <Link className={buttonVariants()} to="/tasks">
+                        <Link className={cn(buttonVariants())} to="/tasks">
                             Today’s tasks
                         </Link>
                     </CardFooter>

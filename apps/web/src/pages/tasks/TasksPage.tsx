@@ -37,7 +37,10 @@ export function TasksPage({ date }: TasksPageProps) {
                         {date === today && <span> · Today</span>}
                     </p>
                 </div>
-                <Button onClick={() => setModal({ mode: 'create' })}>
+                <Button
+                    className="self-start sm:self-auto"
+                    onClick={() => setModal({ mode: 'create' })}
+                >
                     <Plus aria-hidden="true" data-icon="inline-start" />
                     New task
                 </Button>

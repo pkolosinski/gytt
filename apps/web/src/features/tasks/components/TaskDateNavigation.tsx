@@ -1,5 +1,6 @@
 import { useId } from 'react';
 
+import { cn } from 'cn';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 
@@ -23,21 +24,21 @@ export function TaskDateNavigation({ onSelectDate, selectedDate, today }: TaskDa
             <div className="flex items-center gap-2">
                 <Link
                     aria-label="Previous day"
-                    className={buttonVariants({ size: 'icon', variant: 'outline' })}
+                    className={cn(buttonVariants({ size: 'icon', variant: 'outline' }))}
                     to={tasksPath(addDays(selectedDate, -1))}
                 >
                     <ChevronLeft aria-hidden="true" />
                 </Link>
                 <Link
                     aria-current={selectedDate === today ? 'date' : undefined}
-                    className={buttonVariants({ variant: 'outline' })}
+                    className={cn(buttonVariants({ variant: 'outline' }))}
                     to={tasksPath(today)}
                 >
                     Today
                 </Link>
                 <Link
                     aria-label="Next day"
-                    className={buttonVariants({ size: 'icon', variant: 'outline' })}
+                    className={cn(buttonVariants({ size: 'icon', variant: 'outline' }))}
                     to={tasksPath(addDays(selectedDate, 1))}
                 >
                     <ChevronRight aria-hidden="true" />

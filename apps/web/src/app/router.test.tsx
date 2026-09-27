@@ -1,30 +1,48 @@
-import { renderToStaticMarkup } from 'react-dom/server';
+// @vitest-environment jsdom
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+
+import { createMockTasksDataSource, TasksDataSourceProvider } from '@/features/tasks/index.ts';
 
 import { AppRouter } from './router.tsx';
 
 function renderRoute(path: string) {
-    return renderToStaticMarkup(
-        <MemoryRouter initialEntries={[path]}>
-            <AppRouter />
-        </MemoryRouter>,
+    return render(
+        <QueryClientProvider client={new QueryClient()}>
+            <TasksDataSourceProvider source={createMockTasksDataSource()}>
+                <MemoryRouter initialEntries={[path]}>
+                    <AppRouter />
+                </MemoryRouter>
+            </TasksDataSourceProvider>
+        </QueryClientProvider>,
     );
 }
 
+afterEach(cleanup);
+
 describe('application routes', () => {
     it('renders the Dashboard greeting and local module links', () => {
-        const markup = renderRoute('/');
+        const { container } = renderRoute('/');
 
-        expect(markup).toContain('Make today count.');
-        expect(markup).toContain('href="/tasks"');
-        expect(markup).toContain('href="/habits/day"');
+        expect(screen.getByRole('heading', { name: 'Make today count.' })).toBeTruthy();
+        expect(container.querySelector('a[href="/tasks"]')).not.toBeNull();
+        expect(container.querySelector('a[href="/habits/day"]')).not.toBeNull();
     });
 
-    it.each(['/tasks', '/habits/day', '/habits/week', '/habits/month'])(
+    it.each(['/habits/day', '/habits/week', '/habits/month'])(
         'resolves the local %s route',
         (path) => {
-            expect(renderRoute(path)).toContain('Workspace coming next');
+            renderRoute(path);
+
+            expect(screen.getByText('Workspace coming next')).toBeTruthy();
         },
     );
+
+    it('resolves the Tasks date route', async () => {
+        renderRoute('/tasks/2026-09-03');
+
+        expect(await screen.findByRole('heading', { level: 1, name: 'Tasks' })).toBeTruthy();
+    });
 });

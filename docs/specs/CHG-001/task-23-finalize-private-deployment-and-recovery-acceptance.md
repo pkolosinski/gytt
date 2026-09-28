@@ -2,7 +2,7 @@
 
 **Status:** pending
 
-**Depends on:** Task 19, Task 20, Task 21, Task 22
+**Depends on:** Task 19, Task 20, Task 21, Task 22, Task 25
 
 **Description:** Execute and record final acceptance of the no-root, secret-mounted, loopback-only application and private Couchbase deployment, including access-boundary behavior, timeout ordering, runtime traffic inspection, browser/service/database restart, backup, compatible image rollback, incompatible-schema restoration, and unrecoverable sole-volume loss. Assemble the already-implemented pinned images, persistent volume, private ports, migration/runtime identities, secret checks, Community Edition privacy-limitation attestation, and timeout settings into the final deployment without taking ownership away from earlier tasks. Add a deployment smoke script for readiness and same-volume restart. Execute the external-proxy and real-browser checklist, including an induced slow request that proves the actual proxy deadline exceeds Ktor's, private-only traffic capture, browser restart, compatible rollback, and a local backup/restore rehearsal for an incompatible schema. Record the results and make the verification script fail when required evidence is absent. Do not add automated browser or reverse-proxy tests.
 

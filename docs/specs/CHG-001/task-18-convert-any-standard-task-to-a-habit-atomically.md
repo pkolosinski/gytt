@@ -4,21 +4,22 @@
 
 **Depends on:** Task 8, Task 13
 
-**Description:** Prefill a valid Habit from either standard Task type, then atomically create the supplied Habit/definition IDs, complete the source Task with a write-once visible reference, and increment the board-composition revision. Apply the same backdated confirmation rule, reject a different second conversion after reopening, keep composite board reads wholly before or after conversion, and reconcile ambiguous conversion commits. Add the thin cross-capability workflow and abstract unit-of-work, with policy remaining in Tasks/Habits. Use a side-effect-free Couchbase transaction to validate Task revision and the write-once `convertedHabitId`, insert Habit, append the sequenced completion/reference, and increment the board-composition revision only for a new conversion. Add identical-retry and `TASK_ALREADY_CONVERTED` behavior, known rollback, deterministic read-back, dispatched-timeout coverage, and integration tests that pause conversion between the two board queries to prove the revision fence. Extend the existing Task modal rather than creating a second details surface.
+**Description:** Build and obtain acceptance for the Task-to-Habit prefill, backdated-warning, confirmation, retry, and reference-display flow in the existing Task modal with mock data. Then define the conversion OpenAPI contract, generate the client, and connect the accepted modal. Implement the Tasks/Habits policies, thin cross-capability workflow, abstract unit-of-work, Couchbase transaction, revision fence, and ambiguity/rollback handling last. Keep policy in Tasks/Habits and the transaction side-effect-free; a new conversion atomically creates the supplied Habit/definition IDs, completes and references the Task, and increments the board-composition revision.
 
 Implementation subtasks:
 
-1. [ ] Add Tasks policy for write-once `convertedHabitId`, sequenced completion/reference, identical conversion retry, and `TASK_ALREADY_CONVERTED`.
-2. [ ] Add Habits policy for validating and creating the caller-supplied Habit and initial definition IDs within a unit of work.
-3. [ ] Implement the thin cross-capability workflow and abstract unit-of-work without moving business policy out of Tasks or Habits.
-4. [ ] Implement the side-effect-free Couchbase transaction for Task validation, Habit insertion, completion/reference append, and one board-composition revision increment.
-5. [ ] Add transaction tests for Anytime and Fixed-day success, identical retry without duplicates/revision increment, different second conversion, and known rollback.
-6. [ ] Add backdated conversion reject/confirm tests proving the first attempt changes neither aggregate and the confirmed transaction removes later logs coherently.
-7. [ ] Add ambiguous commit and dispatched-timeout reconciliation that reads both deterministic aggregates and returns success only for the complete postcondition.
-8. [ ] Add board-query/conversion race tests proving the revision fence returns wholly before/after state or one retryable whole-board failure after bounded exhaustion.
-9. [ ] Add the conversion HTTP/OpenAPI/client contract and focused mappings for later-log warning, second conversion, rollback, and `COMMIT_UNKNOWN`.
-10. [ ] Extend the existing Task modal with prefilled Habit fields, stable caller IDs, confirmation, warning retry, and original Habit reference display.
-11. [ ] Add component tests for prefill and successful conversion from both standard Task types, identical retry, rejection, and indeterminate reload behavior.
+1. [ ] Extend the existing Task modal with mock prefilled Habit fields, stable caller IDs, backdate warning, confirmation, retry, and original Habit reference states.
+2. [ ] Add component tests for mocked conversion from both standard Task types, identical retry, rejection, and indeterminate reload; obtain UI acceptance before defining the contract.
+3. [ ] Define and verify the conversion OpenAPI contract and focused mappings for later-log warning, second conversion, rollback, and `COMMIT_UNKNOWN`; regenerate the client.
+4. [ ] Connect the accepted Task modal conversion flow to the generated client contract.
+5. [ ] Add Tasks policy for write-once `convertedHabitId`, sequenced completion/reference, identical conversion retry, and `TASK_ALREADY_CONVERTED`.
+6. [ ] Add Habits policy for validating and creating the caller-supplied Habit and initial definition IDs within a unit of work.
+7. [ ] Implement the thin cross-capability workflow and abstract unit-of-work without moving business policy out of Tasks or Habits.
+8. [ ] Implement the side-effect-free Couchbase transaction for Task validation, Habit insertion, completion/reference append, and one board-composition revision increment.
+9. [ ] Add transaction tests for Anytime and Fixed-day success, identical retry without duplicates/revision increment, different second conversion, known rollback, and backdated reject/confirm behavior.
+10. [ ] Add ambiguous commit and dispatched-timeout reconciliation that reads both deterministic aggregates and returns success only for the complete postcondition.
+11. [ ] Add board-query/conversion race tests proving the revision fence returns wholly before/after state or a retryable whole-board failure after bounded exhaustion.
+12. [ ] Add conversion routes and end-to-end tests proving the accepted modal contract and conversion outcomes.
 
 **Acceptance Criteria:**
 
@@ -28,3 +29,4 @@ Implementation subtasks:
 - Scenario "Fence a Tasks board during conversion" returns a state wholly before or after conversion and fails as one unit after bounded retry exhaustion.
 - Transaction lambdas perform no logging, clock reads, ID generation, or external calls.
 - Identical retries reuse the supplied Habit and definition IDs without duplicates.
+- The conversion UI is accepted with mock data before its OpenAPI contract and backend implementation begin.

@@ -4,7 +4,7 @@
 
 **Depends on:** Task 15, Task 18
 
-**Description:** Run cross-family regression coverage for already-implemented ambiguity and outage handling, and prove that browser, service, and database restart retain all saved Tasks, Habits, progress, and history while discarding only unsaved browser drafts. Exercise every mutation family's existing postcondition reader through a common regression matrix without adding missing production behavior here. Verify exact error/trace/redaction behavior, dispatched timeout handling, deterministic-ID reuse, and the shared retry/indeterminate UI already introduced by the mutation slices. Restart the browser harness, Ktor service, and Testcontainers Couchbase node against the same test volume and verify all source-of-truth documents and projections.
+**Description:** Before Dashboard implementation, run capability-readiness regression coverage for already-implemented mutation ambiguity and outage handling, and prove that browser, service, and database restart retain saved Tasks, Habits, progress, and history while discarding only unsaved browser drafts. Exercise every mutation family's existing postcondition reader through a common regression matrix without adding missing production behavior here. Verify exact error/trace/redaction behavior, dispatched timeout handling, deterministic-ID reuse, and the shared retry/indeterminate UI already introduced by the mutation slices. Restart the browser harness, Ktor service, and Testcontainers Couchbase node against the same test volume and verify all source-of-truth documents and board projections; Dashboard summaries are verified in Tasks 24 and 17.
 
 Implementation subtasks:
 
@@ -15,7 +15,7 @@ Implementation subtasks:
 5. [ ] Run database-outage cases across all mutation families and verify `STORAGE_UNAVAILABLE`, no success UI, and no offline queue.
 6. [ ] Add shared frontend regression coverage requiring reload after `COMMIT_UNKNOWN` and deterministic-ID reuse where applicable.
 7. [ ] Restart the browser harness after acknowledged data plus an unsaved draft and prove only the draft is lost.
-8. [ ] Restart Ktor against the same Couchbase state and verify Tasks, Habits, progress, history, summaries, and board projections.
+8. [ ] Restart Ktor against the same Couchbase state and verify Tasks, Habits, progress, history, and board projections.
 9. [ ] Restart the Testcontainers Couchbase node with the same volume and repeat the source-of-truth and projection assertions.
 10. [ ] Verify structured logs/counters across the matrix contain stable codes and latency but no bodies, personal fields, credentials, database content, or secrets.
 

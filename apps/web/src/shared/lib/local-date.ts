@@ -50,20 +50,16 @@ export function addDays(date: LocalDate, days: number): LocalDate {
     return fromUtcDate(utcDate);
 }
 
-const longDateFormat = new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'full',
-    timeZone: 'UTC',
-});
-
-const shortDateFormat = new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeZone: 'UTC',
-});
-
-export function formatLocalDateLong(date: LocalDate): string {
-    return longDateFormat.format(toUtcDateFromLocalDate(date));
+export function formatLocalDateLong(date: LocalDate, locale = 'pl-PL'): string {
+    return new Intl.DateTimeFormat(locale, {
+        dateStyle: 'full',
+        timeZone: 'UTC',
+    }).format(toUtcDateFromLocalDate(date));
 }
 
-export function formatLocalDateShort(date: LocalDate): string {
-    return shortDateFormat.format(toUtcDateFromLocalDate(date));
+export function formatLocalDateShort(date: LocalDate, locale = 'pl-PL'): string {
+    return new Intl.DateTimeFormat(locale, {
+        dateStyle: 'medium',
+        timeZone: 'UTC',
+    }).format(toUtcDateFromLocalDate(date));
 }

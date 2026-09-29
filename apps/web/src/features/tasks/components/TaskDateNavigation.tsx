@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { buttonVariants } from '@/shared/generated/shadcn/ui/button.tsx';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 import { formControlClassName } from '@/shared/lib/form-control.ts';
 import { addDays, parseLocalDate, type LocalDate } from '@/shared/lib/local-date.ts';
 
@@ -18,12 +19,13 @@ interface TaskDateNavigationProps {
 
 export function TaskDateNavigation({ onSelectDate, selectedDate, today }: TaskDateNavigationProps) {
     const dateInputId = useId();
+    const { t } = useLocale();
 
     return (
-        <nav aria-label="Task dates" className="flex flex-wrap items-end gap-2">
+        <nav aria-label={t('tasks.dates')} className="flex flex-wrap items-end gap-2">
             <div className="flex items-center gap-2">
                 <Link
-                    aria-label="Previous day"
+                    aria-label={t('tasks.previousDay')}
                     className={cn(buttonVariants({ size: 'icon', variant: 'outline' }))}
                     to={tasksPath(addDays(selectedDate, -1))}
                 >
@@ -34,10 +36,10 @@ export function TaskDateNavigation({ onSelectDate, selectedDate, today }: TaskDa
                     className={cn(buttonVariants({ variant: 'outline' }))}
                     to={tasksPath(today)}
                 >
-                    Today
+                    {t('tasks.today')}
                 </Link>
                 <Link
-                    aria-label="Next day"
+                    aria-label={t('tasks.nextDay')}
                     className={cn(buttonVariants({ size: 'icon', variant: 'outline' }))}
                     to={tasksPath(addDays(selectedDate, 1))}
                 >
@@ -46,7 +48,7 @@ export function TaskDateNavigation({ onSelectDate, selectedDate, today }: TaskDa
             </div>
             <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-muted-foreground" htmlFor={dateInputId}>
-                    Go to date
+                    {t('tasks.goToDate')}
                 </label>
                 <input
                     className={formControlClassName}

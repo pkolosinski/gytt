@@ -1,6 +1,7 @@
 import { CalendarClock } from 'lucide-react';
 
 import { Badge } from '@/shared/generated/shadcn/ui/badge.tsx';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 import { formatLocalDateShort, type LocalDate } from '@/shared/lib/local-date.ts';
 
 import type { TaskView } from '../models/task.ts';
@@ -12,6 +13,7 @@ interface StandardTaskCardProps {
 }
 
 export function StandardTaskCard({ onOpen, selectedDate, task }: StandardTaskCardProps) {
+    const { locale, t } = useLocale();
     const isCarriedForward = task.startDate < selectedDate;
 
     return (
@@ -27,11 +29,13 @@ export function StandardTaskCard({ onOpen, selectedDate, task }: StandardTaskCar
                 </span>
             )}
             <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline">Anytime</Badge>
+                <Badge variant="outline">{t('tasks.anytime')}</Badge>
                 {isCarriedForward && (
                     <span className="inline-flex items-center gap-1">
                         <CalendarClock aria-hidden="true" className="size-3.5" />
-                        Since {formatLocalDateShort(task.startDate)}
+                        {t('tasks.since', {
+                            date: formatLocalDateShort(task.startDate, locale),
+                        })}
                     </span>
                 )}
             </span>

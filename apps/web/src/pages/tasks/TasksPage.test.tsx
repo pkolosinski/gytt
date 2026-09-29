@@ -13,6 +13,7 @@ import {
     type TaskRecordView,
     type TasksDataSource,
 } from '@/features/tasks/index.ts';
+import { LocaleProvider } from '@/shared/i18n/LocaleProvider.tsx';
 
 function LocationProbe() {
     const location = useLocation();
@@ -24,14 +25,16 @@ function renderTasks(path: string, source: TasksDataSource = createMockTasksData
         defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
     });
     render(
-        <QueryClientProvider client={queryClient}>
-            <TasksDataSourceProvider source={source}>
-                <MemoryRouter initialEntries={[path]}>
-                    <AppRouter />
-                    <LocationProbe />
-                </MemoryRouter>
-            </TasksDataSourceProvider>
-        </QueryClientProvider>,
+        <LocaleProvider initialLanguage="en">
+            <QueryClientProvider client={queryClient}>
+                <TasksDataSourceProvider source={source}>
+                    <MemoryRouter initialEntries={[path]}>
+                        <AppRouter />
+                        <LocationProbe />
+                    </MemoryRouter>
+                </TasksDataSourceProvider>
+            </QueryClientProvider>
+        </LocaleProvider>,
     );
     return { source, user: userEvent.setup() };
 }
@@ -78,6 +81,8 @@ beforeEach(() => {
 
 afterEach(() => {
     cleanup();
+    window.localStorage.clear();
+    document.documentElement.lang = 'pl';
     vi.useRealTimers();
 });
 

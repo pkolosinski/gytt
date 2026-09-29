@@ -6,11 +6,19 @@ import { Pencil, X } from 'lucide-react';
 import { StatusMessage } from '@/shared/components/StatusMessage.tsx';
 import { Badge } from '@/shared/generated/shadcn/ui/badge.tsx';
 import { Button } from '@/shared/generated/shadcn/ui/button.tsx';
+import type { TranslationKey } from '@/shared/i18n/translations.ts';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 import { formatLocalDateLong, type LocalDate } from '@/shared/lib/local-date.ts';
 
 import { useTaskRecord } from '../hooks/task-queries.ts';
-import { TASK_STATUS_LABELS, type TaskRecordView } from '../models/task.ts';
+import type { TaskRecordView, TaskStatus } from '../models/task.ts';
 import { TaskEditor } from './TaskEditor.tsx';
+
+const statusTranslationKeys = {
+    completed: 'tasks.status.completed',
+    inProgress: 'tasks.status.inProgress',
+    todo: 'tasks.status.todo',
+} satisfies Record<TaskStatus, TranslationKey>;
 
 export type TaskModalState = { mode: 'create' } | { mode: 'task'; taskId: string };
 
@@ -30,6 +38,8 @@ export function TaskModal({
     selectedDate,
     state,
 }: TaskModalProps) {
+    const { t } = useLocale();
+
     return (
         <Dialog.Root
             onOpenChange={(open) => {
@@ -44,7 +54,7 @@ export function TaskModal({
                 <Dialog.Popup className="fixed top-1/2 left-1/2 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-y-auto rounded-xl bg-popover p-5 text-left text-sm text-popover-foreground ring-1 ring-foreground/10 transition duration-150 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
                     {state?.mode === 'create' && (
                         <>
-                            <TaskModalHeader title="New task" />
+                            <TaskModalHeader title={t('tasks.new')} />
                             <TaskEditor
                                 defaultDate={defaultDate}
                                 initial={null}
@@ -72,12 +82,18 @@ interface TaskModalHeaderProps {
 }
 
 function TaskModalHeader({ title }: TaskModalHeaderProps) {
+    const { t } = useLocale();
+
     return (
         <div className="flex items-start justify-between gap-4">
             <Dialog.Title className="m-0 font-heading text-xl font-medium break-words text-foreground">
                 {title}
             </Dialog.Title>
-            <Dialog.Close render={<Button aria-label="Close" size="icon-sm" variant="ghost" />}>
+            <Dialog.Close
+                render={
+                    <Button aria-label={t('tasks.modal.close')} size="icon-sm" variant="ghost" />
+                }
+            >
                 <X aria-hidden="true" />
             </Dialog.Close>
         </div>
@@ -92,14 +108,15 @@ interface TaskRecordContentProps {
 
 function TaskRecordContent({ defaultDate, selectedDate, taskId }: TaskRecordContentProps) {
     const [isEditing, setIsEditing] = useState(false);
+    const { t } = useLocale();
     const record = useTaskRecord(taskId);
 
     if (record.isPending) {
         return (
             <>
-                <TaskModalHeader title="Task" />
+                <TaskModalHeader title={t('tasks.modal.task')} />
                 <p className="text-muted-foreground" role="status">
-                    Loading task…
+                    {t('tasks.modal.loading')}
                 </p>
             </>
         );
@@ -108,17 +125,17 @@ function TaskRecordContent({ defaultDate, selectedDate, taskId }: TaskRecordCont
     if (record.isError) {
         return (
             <>
-                <TaskModalHeader title="Task" />
+                <TaskModalHeader title={t('tasks.modal.task')} />
                 <StatusMessage
                     action={
                         <Button onClick={() => void record.refetch()} size="sm" variant="outline">
-                            Retry
+                            {t('tasks.retry')}
                         </Button>
                     }
-                    title="Task unavailable"
+                    title={t('tasks.modal.unavailable')}
                     tone="error"
                 >
-                    The task could not be loaded from the local service.
+                    {t('tasks.modal.loadError')}
                 </StatusMessage>
             </>
         );
@@ -127,7 +144,7 @@ function TaskRecordContent({ defaultDate, selectedDate, taskId }: TaskRecordCont
     if (isEditing) {
         return (
             <>
-                <TaskModalHeader title="Edit task" />
+                <TaskModalHeader title={t('tasks.modal.edit')} />
                 <TaskEditor
                     defaultDate={defaultDate}
                     initial={record.data}
@@ -157,32 +174,38 @@ interface TaskDetailsProps {
 }
 
 function TaskDetails({ onEdit, record, selectedDate }: TaskDetailsProps) {
+    const { locale, t } = useLocale();
     const isVisibleOnSelectedDate = record.startDate <= selectedDate;
 
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">Anytime</Badge>
-                <Badge variant="secondary">{TASK_STATUS_LABELS[record.latestStatus]}</Badge>
+                <Badge variant="outline">{t('tasks.anytime')}</Badge>
+                <Badge variant="secondary">{t(statusTranslationKeys[record.latestStatus])}</Badge>
             </div>
             {!isVisibleOnSelectedDate && (
-                <StatusMessage title="Not on this board" tone="info">
-                    This task starts after {formatLocalDateLong(selectedDate)}, so it is not shown
-                    on this date.
+                <StatusMessage title={t('tasks.modal.notOnBoard')} tone="info">
+                    {t('tasks.modal.startsAfter', {
+                        date: formatLocalDateLong(selectedDate, locale),
+                    })}
                 </StatusMessage>
             )}
             <dl className="m-0 grid grid-cols-1 gap-3 sm:grid-cols-[8rem_1fr]">
-                <dt className="font-medium text-muted-foreground">Start date</dt>
-                <dd className="m-0 text-foreground">{formatLocalDateLong(record.startDate)}</dd>
-                <dt className="font-medium text-muted-foreground">Details</dt>
+                <dt className="font-medium text-muted-foreground">{t('tasks.modal.startDate')}</dt>
+                <dd className="m-0 text-foreground">
+                    {formatLocalDateLong(record.startDate, locale)}
+                </dd>
+                <dt className="font-medium text-muted-foreground">{t('tasks.modal.details')}</dt>
                 <dd className="m-0 break-words whitespace-pre-wrap text-foreground">
-                    {record.details ?? <span className="text-muted-foreground">No details</span>}
+                    {record.details ?? (
+                        <span className="text-muted-foreground">{t('tasks.modal.noDetails')}</span>
+                    )}
                 </dd>
             </dl>
             <div className="flex justify-end">
                 <Button onClick={onEdit} variant="outline">
                     <Pencil aria-hidden="true" data-icon="inline-start" />
-                    Edit
+                    {t('tasks.modal.editButton')}
                 </Button>
             </div>
         </div>

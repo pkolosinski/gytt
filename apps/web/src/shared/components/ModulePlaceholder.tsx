@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/shared/generated/shadcn/ui/card.tsx';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 
 interface ModulePlaceholderProps {
     description: string;
@@ -20,11 +21,13 @@ interface ModulePlaceholderProps {
 }
 
 export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlaceholderProps) {
+    const { t } = useLocale();
+
     return (
         <main className="flex flex-1 px-5 py-10 text-left sm:px-12 sm:py-16">
             <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
                 <header className="space-y-5">
-                    <Badge variant="outline">Placeholder</Badge>
+                    <Badge variant="outline">{t('placeholder.badge')}</Badge>
                     <div className="space-y-3">
                         <h1 className="m-0 font-heading text-4xl tracking-tight text-foreground sm:text-6xl">
                             {title}
@@ -37,10 +40,8 @@ export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlac
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Workspace coming next</CardTitle>
-                        <CardDescription>
-                            The route is connected and ready for the next implementation slice.
-                        </CardDescription>
+                        <CardTitle>{t('placeholder.heading')}</CardTitle>
+                        <CardDescription>{t('placeholder.description')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
@@ -49,10 +50,10 @@ export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlac
                             </div>
                             <div className="space-y-1">
                                 <p className="font-medium text-foreground">
-                                    {title} navigation is ready.
+                                    {t('placeholder.navigationReady', { module: title })}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    Domain behavior and saved data are not part of this placeholder.
+                                    {t('placeholder.noDomainBehavior')}
                                 </p>
                             </div>
                         </div>
@@ -60,7 +61,7 @@ export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlac
                     <CardFooter className="justify-end">
                         <Button nativeButton={false} render={<Link to="/" />} variant="outline">
                             <ArrowLeft aria-hidden="true" data-icon="inline-start" />
-                            Back to dashboard
+                            {t('placeholder.backToDashboard')}
                         </Button>
                     </CardFooter>
                 </Card>

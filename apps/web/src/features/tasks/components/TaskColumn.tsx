@@ -1,8 +1,16 @@
 import { Badge } from '@/shared/generated/shadcn/ui/badge.tsx';
+import type { TranslationKey } from '@/shared/i18n/translations.ts';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 import type { LocalDate } from '@/shared/lib/local-date.ts';
 
-import { TASK_STATUS_LABELS, type TaskBoardItem, type TaskStatus } from '../models/task.ts';
+import type { TaskBoardItem, TaskStatus } from '../models/task.ts';
 import { StandardTaskCard } from './StandardTaskCard.tsx';
+
+const statusTranslationKeys = {
+    completed: 'tasks.status.completed',
+    inProgress: 'tasks.status.inProgress',
+    todo: 'tasks.status.todo',
+} satisfies Record<TaskStatus, TranslationKey>;
 
 interface TaskColumnProps {
     items: readonly TaskBoardItem[] | null;
@@ -13,8 +21,9 @@ interface TaskColumnProps {
 
 /** One status column. Its heading stays visible and its body stays empty when there are no cards. */
 export function TaskColumn({ items, onOpenTask, selectedDate, status }: TaskColumnProps) {
+    const { t } = useLocale();
     const headingId = `task-column-${status}`;
-    const label = TASK_STATUS_LABELS[status];
+    const label = t(statusTranslationKeys[status]);
 
     return (
         <section
@@ -27,7 +36,10 @@ export function TaskColumn({ items, onOpenTask, selectedDate, status }: TaskColu
                     {label}
                 </h2>
                 {items !== null && (
-                    <Badge aria-label={`${items.length} in ${label}`} variant="secondary">
+                    <Badge
+                        aria-label={t('tasks.countIn', { count: items.length, status: label })}
+                        variant="secondary"
+                    >
                         {items.length}
                     </Badge>
                 )}

@@ -11,43 +11,45 @@ import {
     CardHeader,
     CardTitle,
 } from '@/shared/generated/shadcn/ui/card.tsx';
-
-const modules = [
-    {
-        description: 'Plan, organize, and complete your daily work.',
-        href: '/tasks',
-        icon: ListChecks,
-        prompt: 'Turn your plans into a clear next step.',
-        title: 'Tasks',
-    },
-    {
-        description: 'Build consistency with daily, weekly, and monthly habits.',
-        href: '/habits/day',
-        icon: Repeat2,
-        prompt: 'Keep the routines that matter moving forward.',
-        title: 'Habits',
-    },
-];
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 
 export function DashboardContent() {
+    const { locale, t } = useLocale();
+    const modules = [
+        {
+            description: t('dashboard.tasks.description'),
+            href: '/tasks',
+            icon: ListChecks,
+            prompt: t('dashboard.tasks.prompt'),
+            title: t('dashboard.tasks.title'),
+        },
+        {
+            description: t('dashboard.habits.description'),
+            href: '/habits/day',
+            icon: Repeat2,
+            prompt: t('dashboard.habits.prompt'),
+            title: t('dashboard.habits.title'),
+        },
+    ];
+
     return (
         <main className="flex flex-1 flex-col gap-10 px-5 py-10 text-left sm:gap-14 sm:px-12 sm:py-16">
             <header className="max-w-3xl space-y-5">
                 <p className="text-sm font-medium tracking-[0.12em] text-primary uppercase">
-                    Get Your Things Together
+                    {t('dashboard.eyebrow')}
                 </p>
                 <div className="space-y-3">
                     <h1 className="m-0 font-heading text-4xl tracking-tight text-foreground sm:text-6xl">
-                        Make today count.
+                        {t('dashboard.heading')}
                     </h1>
                     <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                        A calm place for the things you want to do and keep doing.
+                        {t('dashboard.description')}
                     </p>
                 </div>
             </header>
 
             <nav
-                aria-label="GYTT modules"
+                aria-label={t('dashboard.modules')}
                 className="grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2"
             >
                 {modules.map(({ description, href, icon: Icon, prompt, title }) => (
@@ -60,7 +62,7 @@ export function DashboardContent() {
                                 <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <Icon aria-hidden="true" />
                                 </div>
-                                <Badge variant="secondary">Today</Badge>
+                                <Badge variant="secondary">{t('dashboard.today')}</Badge>
                             </div>
                             <CardTitle className="mt-4">{title}</CardTitle>
                             <CardDescription>{description}</CardDescription>
@@ -70,7 +72,9 @@ export function DashboardContent() {
                         </CardContent>
                         <CardFooter className="justify-between gap-4">
                             <span className="text-sm text-muted-foreground">
-                                Open {title.toLowerCase()}
+                                {t('dashboard.openModule', {
+                                    module: title.toLocaleLowerCase(locale),
+                                })}
                             </span>
                             <Button
                                 nativeButton={false}
@@ -78,7 +82,7 @@ export function DashboardContent() {
                                 size="sm"
                                 variant="outline"
                             >
-                                Open
+                                {t('dashboard.open')}
                                 <ArrowRight aria-hidden="true" data-icon="inline-end" />
                             </Button>
                         </CardFooter>

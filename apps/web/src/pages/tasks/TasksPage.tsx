@@ -13,6 +13,7 @@ import {
     type TaskModalState,
 } from '@/features/tasks/index.ts';
 import { Button } from '@/shared/generated/shadcn/ui/button.tsx';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 import { formatLocalDateLong, todayLocalDate, type LocalDate } from '@/shared/lib/local-date.ts';
 
 interface TasksPageProps {
@@ -21,6 +22,7 @@ interface TasksPageProps {
 
 export function TasksPage({ date }: TasksPageProps) {
     const navigate = useNavigate();
+    const { locale, t } = useLocale();
     const today = todayLocalDate();
     const board = useTaskBoard(date);
     const [modal, setModal] = useState<TaskModalState | null>(null);
@@ -30,11 +32,11 @@ export function TasksPage({ date }: TasksPageProps) {
             <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col gap-1">
                     <h1 className="m-0 font-heading text-4xl tracking-tight text-foreground">
-                        Tasks
+                        {t('tasks.title')}
                     </h1>
                     <p className="text-muted-foreground">
-                        <time dateTime={date}>{formatLocalDateLong(date)}</time>
-                        {date === today && <span> · Today</span>}
+                        <time dateTime={date}>{formatLocalDateLong(date, locale)}</time>
+                        {date === today && <span> · {t('tasks.today')}</span>}
                     </p>
                 </div>
                 <Button
@@ -42,7 +44,7 @@ export function TasksPage({ date }: TasksPageProps) {
                     onClick={() => setModal({ mode: 'create' })}
                 >
                     <Plus aria-hidden="true" data-icon="inline-start" />
-                    New task
+                    {t('tasks.new')}
                 </Button>
             </header>
 

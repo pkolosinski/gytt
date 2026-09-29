@@ -10,7 +10,10 @@ export type TaskDraft = {
 
 export type TaskDraftField = keyof TaskDraft;
 
-export type TaskFieldErrors = Partial<Record<TaskDraftField, string>>;
+export type TaskFieldError =
+    'titleRequired' | 'titleTooLong' | 'detailsTooLong' | 'invalidStartDate';
+
+export type TaskFieldErrors = Partial<Record<TaskDraftField, TaskFieldError>>;
 
 function codePointLength(value: string): number {
     return [...value].length;
@@ -21,17 +24,17 @@ export function validateTaskDraft(draft: TaskDraft): TaskFieldErrors {
     const title = draft.title.trim();
 
     if (title.length === 0) {
-        errors.title = 'Enter a title.';
+        errors.title = 'titleRequired';
     } else if (codePointLength(title) > TITLE_MAX_LENGTH) {
-        errors.title = `Use at most ${TITLE_MAX_LENGTH} characters.`;
+        errors.title = 'titleTooLong';
     }
 
     if (codePointLength(draft.details.trim()) > DETAILS_MAX_LENGTH) {
-        errors.details = `Use at most ${DETAILS_MAX_LENGTH} characters.`;
+        errors.details = 'detailsTooLong';
     }
 
     if (parseLocalDate(draft.startDate) === null) {
-        errors.startDate = 'Choose a valid start date.';
+        errors.startDate = 'invalidStartDate';
     }
 
     return errors;

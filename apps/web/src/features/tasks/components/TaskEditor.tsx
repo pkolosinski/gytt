@@ -2,18 +2,28 @@ import { useId, useRef, useState, type FormEvent } from 'react';
 
 import { StatusMessage } from '@/shared/components/StatusMessage.tsx';
 import { Button } from '@/shared/generated/shadcn/ui/button.tsx';
+import type { TranslationKey } from '@/shared/i18n/translations.ts';
+import { useLocale } from '@/shared/i18n/useLocale.ts';
 import { formControlClassName } from '@/shared/lib/form-control.ts';
 import type { LocalDate } from '@/shared/lib/local-date.ts';
 
 import { TaskApiError } from '../api/tasks-data-source.ts';
+import type { TaskProblemCode } from '../api/tasks-data-source.ts';
 import {
     validateTaskDraft,
     type TaskDraft,
     type TaskDraftField,
+    type TaskFieldError,
     type TaskFieldErrors,
 } from '../helpers/task-draft.ts';
 import { useReloadTaskRecord, useSaveTask } from '../hooks/task-queries.ts';
-import type { TaskInput, TaskRecordView, TaskView } from '../models/task.ts';
+import {
+    DETAILS_MAX_LENGTH,
+    TITLE_MAX_LENGTH,
+    type TaskInput,
+    type TaskRecordView,
+    type TaskView,
+} from '../models/task.ts';
 
 interface TaskEditorProps {
     defaultDate: LocalDate;
@@ -26,6 +36,21 @@ type EditorNotice =
     { type: 'conflict' } | { type: 'reloadFailed' } | { type: 'saveFailed'; detail: string };
 
 const DRAFT_FIELDS: readonly TaskDraftField[] = ['title', 'details', 'startDate'];
+
+const taskErrorTranslationKeys = {
+    ID_REUSED: 'tasks.error.idReused',
+    NOT_FOUND: 'tasks.error.notFound',
+    STORAGE_UNAVAILABLE: 'tasks.error.storage',
+    VALIDATION_FAILED: 'tasks.error.validation',
+    VERSION_CONFLICT: 'tasks.error.versionConflict',
+} satisfies Record<TaskProblemCode, TranslationKey>;
+
+const fieldErrorTranslationKeys = {
+    detailsTooLong: 'validation.detailsTooLong',
+    invalidStartDate: 'validation.startDate',
+    titleRequired: 'validation.titleRequired',
+    titleTooLong: 'validation.titleTooLong',
+} satisfies Record<TaskFieldError, TranslationKey>;
 
 function toDraft(record: TaskRecordView | null, defaultDate: LocalDate): TaskDraft {
     return {
@@ -48,10 +73,20 @@ function toInput(taskId: string, draft: TaskDraft): TaskInput {
 
 function toFieldErrors(fields: Record<string, string>): TaskFieldErrors {
     const errors: TaskFieldErrors = {};
+    const validationByField: Record<TaskDraftField, TaskFieldError> = {
+        details: 'detailsTooLong',
+        startDate: 'invalidStartDate',
+        title: 'titleRequired',
+    };
+    const validationCodes: Record<string, TaskFieldError> = {
+        detailsTooLong: 'detailsTooLong',
+        invalidStartDate: 'invalidStartDate',
+        titleRequired: 'titleRequired',
+        titleTooLong: 'titleTooLong',
+    };
     for (const field of DRAFT_FIELDS) {
-        const message = fields[field];
-        if (message !== undefined) {
-            errors[field] = message;
+        if (fields[field] !== undefined) {
+            errors[field] = validationCodes[fields[field]] ?? validationByField[field];
         }
     }
     return errors;
@@ -60,6 +95,7 @@ function toFieldErrors(fields: Record<string, string>): TaskFieldErrors {
 /** Owns the Anytime Task draft for creation and editing. */
 export function TaskEditor({ defaultDate, initial, onCancel, onSaved }: TaskEditorProps) {
     const formId = useId();
+    const { t } = useLocale();
     const [taskId] = useState(() => initial?.id ?? crypto.randomUUID());
     const [draft, setDraft] = useState(() => toDraft(initial, defaultDate));
     const [baseVersion, setBaseVersion] = useState(initial?.version ?? null);
@@ -118,13 +154,13 @@ export function TaskEditor({ defaultDate, initial, onCancel, onSaved }: TaskEdit
                 await recoverFromConflict();
             } else if (error instanceof TaskApiError && error.code === 'VALIDATION_FAILED') {
                 showFieldErrors(toFieldErrors(error.fields ?? {}));
-                setNotice({ detail: error.message, type: 'saveFailed' });
+                setNotice({ detail: t('tasks.error.validation'), type: 'saveFailed' });
             } else {
                 setNotice({
                     detail:
                         error instanceof TaskApiError
-                            ? error.message
-                            : 'The local service could not save the task.',
+                            ? t(taskErrorTranslationKeys[error.code])
+                            : t('tasks.editor.localSaveFailed'),
                     type: 'saveFailed',
                 });
             }
@@ -143,36 +179,35 @@ export function TaskEditor({ defaultDate, initial, onCancel, onSaved }: TaskEdit
     const fieldError = (field: TaskDraftField) =>
         fieldErrors[field] === undefined ? null : (
             <p className="text-sm text-destructive" id={errorId(field)}>
-                {fieldErrors[field]}
+                {t(fieldErrorTranslationKeys[fieldErrors[field]], {
+                    count: field === 'title' ? TITLE_MAX_LENGTH : DETAILS_MAX_LENGTH,
+                })}
             </p>
         );
 
     return (
         <form className="flex flex-col gap-5" noValidate onSubmit={handleSubmit}>
             {notice?.type === 'conflict' && (
-                <StatusMessage title="This task changed elsewhere" tone="info">
-                    A newer saved version replaced your edit. Review it and save again if needed.
+                <StatusMessage title={t('tasks.editor.conflictTitle')} tone="info">
+                    {t('tasks.editor.conflictDescription')}
                 </StatusMessage>
             )}
             {notice?.type === 'reloadFailed' && (
-                <StatusMessage title="Task changed elsewhere" tone="error">
-                    A newer version exists, but it could not be loaded. Your draft was kept; try
-                    again later.
+                <StatusMessage title={t('tasks.editor.reloadFailedTitle')} tone="error">
+                    {t('tasks.editor.reloadFailedDescription')}
                 </StatusMessage>
             )}
             {notice?.type === 'saveFailed' && (
-                <StatusMessage title="Task not saved" tone="error">
-                    {notice.detail} Your draft was kept.
+                <StatusMessage title={t('tasks.editor.saveFailedTitle')} tone="error">
+                    {notice.detail} {t('tasks.editor.draftKept')}
                 </StatusMessage>
             )}
 
-            <p className="text-sm text-muted-foreground">
-                Anytime tasks appear on every date from their start day until they are completed.
-            </p>
+            <p className="text-sm text-muted-foreground">{t('tasks.editor.description')}</p>
 
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-foreground" htmlFor={fieldId('title')}>
-                    Title
+                    {t('tasks.editor.title')}
                 </label>
                 <input
                     {...fieldProps('title')}
@@ -188,7 +223,10 @@ export function TaskEditor({ defaultDate, initial, onCancel, onSaved }: TaskEdit
 
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-foreground" htmlFor={fieldId('details')}>
-                    Details <span className="font-normal text-muted-foreground">(optional)</span>
+                    {t('tasks.editor.details')}{' '}
+                    <span className="font-normal text-muted-foreground">
+                        {t('tasks.editor.optional')}
+                    </span>
                 </label>
                 <textarea
                     {...fieldProps('details')}
@@ -205,7 +243,7 @@ export function TaskEditor({ defaultDate, initial, onCancel, onSaved }: TaskEdit
                     className="text-sm font-medium text-foreground"
                     htmlFor={fieldId('startDate')}
                 >
-                    Start date
+                    {t('tasks.modal.startDate')}
                 </label>
                 <input
                     {...fieldProps('startDate')}
@@ -220,14 +258,14 @@ export function TaskEditor({ defaultDate, initial, onCancel, onSaved }: TaskEdit
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button onClick={onCancel} type="button" variant="outline">
-                    Cancel
+                    {t('tasks.editor.cancel')}
                 </Button>
                 <Button disabled={saveTask.isPending} type="submit">
                     {saveTask.isPending
-                        ? 'Saving…'
+                        ? t('tasks.editor.saving')
                         : initial === null
-                          ? 'Create task'
-                          : 'Save changes'}
+                          ? t('tasks.editor.create')
+                          : t('tasks.editor.saveChanges')}
                 </Button>
             </div>
         </form>

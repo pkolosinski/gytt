@@ -4,12 +4,6 @@ export type TaskStatus = 'todo' | 'inProgress' | 'completed';
 
 export const TASK_STATUSES: readonly TaskStatus[] = ['todo', 'inProgress', 'completed'];
 
-export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-    completed: 'Completed',
-    inProgress: 'In progress',
-    todo: 'To do',
-};
-
 export type AnytimeTaskInput = {
     id: string;
     type: 'anytime';

@@ -2,7 +2,8 @@ import { Route, Routes } from 'react-router';
 
 import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx';
 import { HabitsPage } from '../pages/habits/HabitsPage.tsx';
-import { TasksPage } from '../pages/tasks/TasksPage.tsx';
+import { TasksDatePage } from '../pages/tasks/TasksDatePage.tsx';
+import { TasksTodayRedirect } from '../pages/tasks/TasksTodayRedirect.tsx';
 
 export function AppRouter() {
     return (
@@ -11,7 +12,8 @@ export function AppRouter() {
             <Route path="/habits/day" element={<HabitsPage />} />
             <Route path="/habits/month" element={<HabitsPage />} />
             <Route path="/habits/week" element={<HabitsPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/tasks" element={<TasksTodayRedirect />} />
+            <Route path="/tasks/:date" element={<TasksDatePage />} />
         </Routes>
     );
 }

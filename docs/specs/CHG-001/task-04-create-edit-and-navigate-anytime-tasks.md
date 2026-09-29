@@ -1,6 +1,6 @@
 # Task 4: Create, edit, and navigate Anytime tasks
 
-**Status:** pending
+**Status:** in progress
 
 **Depends on:** Task 3
 
@@ -8,9 +8,9 @@
 
 Implementation subtasks:
 
-1. [ ] Build `/tasks` Today redirection, exact `/tasks/:date` navigation, malformed-date state, and the stable three-column board with mock data.
-2. [ ] Build the unified modal shell and Anytime editor with mock data, default/future start dates, draft-preserving validation, and create/edit states.
-3. [ ] Build Anytime card/details and by-ID conflict-reload states with mock data, preserving drafts and representing changed board visibility.
+1. [x] Build `/tasks` Today redirection, exact `/tasks/:date` navigation, malformed-date state, and the stable three-column board with mock data.
+2. [x] Build the unified modal shell and Anytime editor with mock data, default/future start dates, draft-preserving validation, and create/edit states.
+3. [x] Build Anytime card/details and by-ID conflict-reload states with mock data, preserving drafts and representing changed board visibility.
 4. [ ] Add component tests for the mocked board, navigation, editor, carry-forward, conflict, and whole-board failure states; obtain UI acceptance before defining the API contract.
 5. [ ] Define and verify the OpenAPI create/update/by-ID/composite-read contract and board union, then regenerate the TypeScript client.
 6. [ ] Connect the accepted routes, board, editor, and conflict/error states to the generated client contract.

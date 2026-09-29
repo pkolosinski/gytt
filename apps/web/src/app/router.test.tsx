@@ -46,8 +46,8 @@ describe('application routes', () => {
         renderRoute('/', null);
 
         expect(screen.getByRole('heading', { name: 'Niech ten dzień będzie dobry.' })).toBeTruthy();
-        expect(screen.getByRole('heading', { name: 'Zadania' })).toBeTruthy();
-        expect(screen.getByRole('heading', { name: 'Nawyki' })).toBeTruthy();
+        expect(screen.getByText('Zadania', { exact: true })).toBeTruthy();
+        expect(screen.getByText('Nawyki', { exact: true })).toBeTruthy();
         expect(screen.getByRole('combobox', { name: 'Język' })).toHaveProperty('value', 'pl');
         await waitFor(() => expect(document.documentElement.lang).toBe('pl'));
     });

@@ -1,6 +1,6 @@
 # Task 1: Localize the web application in Polish and English
 
-**Status:** in progress
+**Status:** done
 
 **Depends on:** None
 
@@ -8,10 +8,10 @@
 
 Implementation subtasks:
 
-1. [ ] Add the typed localization provider, dictionaries, persistence, and shared language selector.
-2. [ ] Replace user-facing strings and browser-locale date formatting with selected-language translations.
-3. [ ] Add tests for Polish default, English selection and persistence, and translated views.
-4. [ ] Run the web test, build, and lint commands and complete validation.
+1. [x] Add the typed localization provider, dictionaries, persistence, and shared language selector.
+2. [x] Replace user-facing strings and browser-locale date formatting with selected-language translations.
+3. [x] Add tests for Polish default, English selection and persistence, and translated views.
+4. [x] Run the web test, build, and lint commands and complete validation.
 
 **Acceptance Criteria:**
 

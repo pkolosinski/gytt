@@ -1,1 +1,0 @@
-rootProject.name = "gytt-backend"

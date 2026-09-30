@@ -1,0 +1,5 @@
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@oxlint/binding-linux-arm64-gnu@1.83.0'
+  - '@oxlint/binding-linux-x64-gnu@1.83.0'

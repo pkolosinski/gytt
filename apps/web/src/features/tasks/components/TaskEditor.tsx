@@ -5,7 +5,7 @@ import { Button } from '@/shared/generated/shadcn/ui/button.tsx';
 import { formControlClassName } from '@/shared/lib/form-control.ts';
 import type { LocalDate } from '@/shared/lib/local-date.ts';
 
-import { TaskApiError } from '../api/tasks-data-source.ts';
+import { TaskApiError } from '../api/task-api-error.ts';
 import {
     validateTaskDraft,
     type TaskDraft,

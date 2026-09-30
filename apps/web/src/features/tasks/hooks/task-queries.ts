@@ -2,30 +2,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { LocalDate } from '@/shared/lib/local-date.ts';
 
+import { tasksApi } from '../api/tasks-api.ts';
+import { taskQueries, taskQueryKeys } from '../api/tasks-query-options.ts';
 import type { TaskInput, TaskRecordView, TaskView } from '../models/task.ts';
-import { useTasksDataSource } from './tasks-data-source-context.ts';
-
-export const taskQueryKeys = {
-    all: ['tasks'] as const,
-    board: (date: LocalDate) => ['tasks', 'board', date] as const,
-    boards: ['tasks', 'board'] as const,
-    record: (taskId: string) => ['tasks', 'record', taskId] as const,
-};
 
 export function useTaskBoard(date: LocalDate) {
-    const source = useTasksDataSource();
-    return useQuery({
-        queryFn: () => source.getBoard(date),
-        queryKey: taskQueryKeys.board(date),
-    });
+    return useQuery(taskQueries.board(date));
 }
 
 export function useTaskRecord(taskId: string) {
-    const source = useTasksDataSource();
-    return useQuery({
-        queryFn: () => source.getTask(taskId),
-        queryKey: taskQueryKeys.record(taskId),
-    });
+    return useQuery(taskQueries.record(taskId));
 }
 
 type SaveTaskVariables = {
@@ -35,14 +21,13 @@ type SaveTaskVariables = {
 
 /** Creates or updates a Task and refreshes every board and the saved record. */
 export function useSaveTask() {
-    const source = useTasksDataSource();
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: ({ input, version }: SaveTaskVariables): Promise<TaskView> =>
             version === null
-                ? source.createTask(input)
-                : source.updateTask(input.id, input, version),
+                ? tasksApi.createTask(input)
+                : tasksApi.updateTask(input.id, input, version),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
         },
@@ -54,12 +39,13 @@ export function useSaveTask() {
  * which may no longer contain the Task.
  */
 export function useReloadTaskRecord() {
-    const source = useTasksDataSource();
     const queryClient = useQueryClient();
 
     return async (taskId: string): Promise<TaskRecordView> => {
-        const record = await source.getTask(taskId);
-        queryClient.setQueryData(taskQueryKeys.record(taskId), record);
+        const record = await queryClient.fetchQuery({
+            ...taskQueries.record(taskId),
+            staleTime: 0,
+        });
         await queryClient.invalidateQueries({ queryKey: taskQueryKeys.boards });
         return record;
     };

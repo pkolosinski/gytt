@@ -110,6 +110,7 @@ Per the confirmed test boundary, CHG-001 does not add automated browser or rever
 - [0009 — Isolate generated web code](../../adr/0009-isolate-generated-web-code.md)
 - [0010 — Use Couchbase Mobile for offline sync](../../adr/0010-use-couchbase-mobile-for-offline-sync.md)
 - [0011 — Record Community Edition privacy limitations](../../adr/0011-record-community-edition-privacy-limitations.md)
+- [0012 — Use module-scoped web data access with TanStack Query](../../adr/0012-use-module-scoped-web-data-access.md)
 
 ## Backend
 

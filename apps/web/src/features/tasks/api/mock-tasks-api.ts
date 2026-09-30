@@ -8,9 +8,10 @@ import type {
     TaskRecordView,
     TaskView,
 } from '../models/task.ts';
-import { TaskApiError, type TasksDataSource } from './tasks-data-source.ts';
+import { TaskApiError } from './task-api-error.ts';
+import type { TasksApi } from './tasks-api.ts';
 
-type MockTasksDataSourceOptions = {
+type MockTasksApiOptions = {
     tasks?: readonly TaskRecordView[];
     delayMs?: number;
 };
@@ -69,10 +70,10 @@ function hasSameContent(record: TaskRecordView, input: TaskInput): boolean {
  * visibility, idempotent create, and version-conflict rules so the UI can be
  * accepted before the contract and backend exist.
  */
-export function createMockTasksDataSource({
+export function createMockTasksApi({
     tasks = [],
     delayMs = 0,
-}: MockTasksDataSourceOptions = {}): TasksDataSource {
+}: MockTasksApiOptions = {}): TasksApi {
     const records = new Map<string, TaskRecordView>(tasks.map((task) => [task.id, { ...task }]));
 
     function requireRecord(taskId: string): TaskRecordView {

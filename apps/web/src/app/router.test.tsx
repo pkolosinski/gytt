@@ -4,18 +4,14 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { createMockTasksDataSource, TasksDataSourceProvider } from '@/features/tasks/index.ts';
-
 import { AppRouter } from './router.tsx';
 
 function renderRoute(path: string) {
     return render(
         <QueryClientProvider client={new QueryClient()}>
-            <TasksDataSourceProvider source={createMockTasksDataSource()}>
-                <MemoryRouter initialEntries={[path]}>
-                    <AppRouter />
-                </MemoryRouter>
-            </TasksDataSourceProvider>
+            <MemoryRouter initialEntries={[path]}>
+                <AppRouter />
+            </MemoryRouter>
         </QueryClientProvider>,
     );
 }

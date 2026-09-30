@@ -7,11 +7,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppRouter } from '@/app/router.tsx';
 import {
-    createMockTasksDataSource,
+    createMockTasksApi,
     TaskApiError,
-    TasksDataSourceProvider,
+    tasksApi,
     type TaskRecordView,
-    type TasksDataSource,
+    type TasksApi,
 } from '@/features/tasks/index.ts';
 
 function LocationProbe() {
@@ -19,18 +19,24 @@ function LocationProbe() {
     return <output data-testid="location">{location.pathname}</output>;
 }
 
-function renderTasks(path: string, source: TasksDataSource = createMockTasksDataSource()) {
+function stubTasksApi(source: TasksApi) {
+    vi.spyOn(tasksApi, 'getBoard').mockImplementation(source.getBoard);
+    vi.spyOn(tasksApi, 'getTask').mockImplementation(source.getTask);
+    vi.spyOn(tasksApi, 'createTask').mockImplementation(source.createTask);
+    vi.spyOn(tasksApi, 'updateTask').mockImplementation(source.updateTask);
+}
+
+function renderTasks(path: string, source: TasksApi = createMockTasksApi()) {
+    stubTasksApi(source);
     const queryClient = new QueryClient({
         defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
     });
     render(
         <QueryClientProvider client={queryClient}>
-            <TasksDataSourceProvider source={source}>
-                <MemoryRouter initialEntries={[path]}>
-                    <AppRouter />
-                    <LocationProbe />
-                </MemoryRouter>
-            </TasksDataSourceProvider>
+            <MemoryRouter initialEntries={[path]}>
+                <AppRouter />
+                <LocationProbe />
+            </MemoryRouter>
         </QueryClientProvider>,
     );
     return { source, user: userEvent.setup() };
@@ -78,6 +84,7 @@ beforeEach(() => {
 
 afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
     vi.useRealTimers();
 });
 
@@ -134,7 +141,7 @@ describe('Tasks board', () => {
     });
 
     it('carries an Anytime task through its active interval', async () => {
-        const source = createMockTasksDataSource({ tasks: [anytimeTask()] });
+        const source = createMockTasksApi({ tasks: [anytimeTask()] });
         const { user } = renderTasks('/tasks/2026-09-01', source);
 
         await waitForBoard();
@@ -150,9 +157,9 @@ describe('Tasks board', () => {
     });
 
     it('replaces the whole board with one retryable error when the board read fails', async () => {
-        const mock = createMockTasksDataSource({ tasks: [anytimeTask()] });
+        const mock = createMockTasksApi({ tasks: [anytimeTask()] });
         let failures = 1;
-        const source: TasksDataSource = {
+        const source: TasksApi = {
             ...mock,
             getBoard: (date) => {
                 if (failures > 0) {
@@ -179,7 +186,7 @@ describe('Tasks board', () => {
 
     it('renders user content as literal text', async () => {
         const markup = '<img src=x onerror="alert(1)">';
-        const source = createMockTasksDataSource({
+        const source = createMockTasksApi({
             tasks: [anytimeTask({ details: '<script>alert(2)</script>', title: markup })],
         });
         const { user } = renderTasks('/tasks/2026-09-03', source);
@@ -270,7 +277,7 @@ describe('Anytime task editor', () => {
     });
 
     it('edits an Anytime task without creating a duplicate', async () => {
-        const source = createMockTasksDataSource({ tasks: [anytimeTask()] });
+        const source = createMockTasksApi({ tasks: [anytimeTask()] });
         const { user } = renderTasks('/tasks/2026-09-03', source);
 
         await user.click(await within(column('To do')).findByRole('button', { name: /Water/ }));
@@ -298,7 +305,7 @@ describe('Anytime task editor', () => {
     });
 
     it('reloads a Task by ID after a version conflict and drops it from the board', async () => {
-        const source = createMockTasksDataSource({ tasks: [anytimeTask()] });
+        const source = createMockTasksApi({ tasks: [anytimeTask()] });
         const { user } = renderTasks('/tasks/2026-09-03', source);
 
         await user.click(await within(column('To do')).findByRole('button', { name: /Water/ }));

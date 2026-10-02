@@ -9,36 +9,32 @@ import {
     SelectItem,
 } from '@/shared/generated/shadcn/ui/select.tsx';
 import { SidebarMenuButton, SidebarMenuItem } from '@/shared/generated/shadcn/ui/sidebar.tsx';
-import { useLanguage } from '@/shared/i18n/i18n.ts';
-import { isLanguage, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/shared/i18n/languages.ts';
+import { LANGUAGES } from '@/shared/i18n/i18n.ts';
 
 export function LanguageMenuItem() {
-    const { t } = useTranslation();
-    const { changeLanguage, language } = useLanguage();
+    const { i18n, t } = useTranslation(['sidebar']);
 
     return (
         <SidebarMenuItem>
             <Select
                 onValueChange={(value) => {
-                    if (isLanguage(value)) {
-                        void changeLanguage(value);
-                    }
+                    value && i18n.changeLanguage(value);
                 }}
-                value={language}
+                value={i18n.resolvedLanguage}
             >
                 {/* The sidebar button keeps the item aligned with the theme switch and collapses to its icon. */}
                 <SelectPrimitive.Trigger
-                    aria-label={t('app.language')}
-                    render={<SidebarMenuButton tooltip={t('app.language')} />}
+                    aria-label={t('language')}
+                    render={<SidebarMenuButton tooltip={t('language')} />}
                 >
                     <Languages aria-hidden="true" />
-                    <span>{LANGUAGE_NAMES[language]}</span>
+                    <span>{i18n.resolvedLanguage && LANGUAGES[i18n.resolvedLanguage]}</span>
                 </SelectPrimitive.Trigger>
                 <SelectContent alignItemWithTrigger={false} side="top">
                     <SelectGroup>
-                        {SUPPORTED_LANGUAGES.map((option) => (
-                            <SelectItem key={option} lang={option} value={option}>
-                                {LANGUAGE_NAMES[option]}
+                        {Object.keys(LANGUAGES).map((lang) => (
+                            <SelectItem key={lang} lang={lang} value={lang}>
+                                {LANGUAGES[lang]}
                             </SelectItem>
                         ))}
                     </SelectGroup>

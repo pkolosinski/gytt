@@ -1,0 +1,21 @@
+{
+  "eyebrow": "Get Your Things Together",
+  "title": "Niech dzisiejszy dzień się liczy.",
+  "subtitle": "Spokojne miejsce na to, co chcesz robić i robić dalej.",
+  "modulesLabel": "Moduły GYTT",
+  "today": "Dzisiaj",
+  "modules": {
+    "tasks": {
+      "title": "Zadania",
+      "description": "Planuj, porządkuj i kończ swoje codzienne sprawy.",
+      "prompt": "Zamień plany w jasny następny krok.",
+      "openLabel": "Otwórz zadania"
+    },
+    "habits": {
+      "title": "Nawyki",
+      "description": "Buduj regularność dzięki codziennym, tygodniowym i miesięcznym nawykom.",
+      "prompt": "Podtrzymuj rutyny, które mają znaczenie.",
+      "openLabel": "Otwórz nawyki"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "home": "GYTT home",
+  "menu": "Menu",
+  "openMenu": "Open menu",
+  "collapseSidebar": "Collapse sidebar",
+  "expandSidebar": "Expand sidebar",
+  "preferences": "Preferences",
+  "darkTheme": "Dark theme",
+  "language": "Language",
+  "sections": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "habits": "Habits"
+  }
+}

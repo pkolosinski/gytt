@@ -16,6 +16,7 @@ import { useDeleteTask, useTaskBoard, useTaskRecord } from '../hooks/task-querie
 import { type TaskRecordView, type TaskStatus, type TaskView } from '../models/task.ts';
 import { TaskEditor } from './TaskEditor.tsx';
 import { TaskStatusMenu } from './TaskStatusMenu.tsx';
+import { TaskStepList } from './TaskStepList.tsx';
 
 export type TaskModalState =
     { mode: 'create'; status: TaskStatus } | { mode: 'task'; task: TaskView };
@@ -24,20 +25,32 @@ type TaskMoves = ReturnType<typeof useTaskMoves>;
 
 interface TaskModalProps {
     defaultDate: LocalDate;
+    isStepPending: boolean;
     moves: TaskMoves;
+    onClearStepError: () => void;
     onClose: () => void;
     onCreated: () => void;
+    onToggleStep: (
+        task: TaskView,
+        stepId: string,
+        isCompleted: boolean,
+    ) => Promise<TaskView | null>;
     selectedDate: LocalDate;
+    stepError: { taskId: string; message: string } | null;
     state: TaskModalState | null;
 }
 
 /** The single modal used by every Tasks-board card and the create action. */
 export function TaskModal({
     defaultDate,
+    isStepPending,
     moves,
+    onClearStepError,
     onClose,
     onCreated,
+    onToggleStep,
     selectedDate,
+    stepError,
     state,
 }: TaskModalProps) {
     const { t } = useTranslation();
@@ -63,6 +76,8 @@ export function TaskModal({
                                 initial={null}
                                 onCancel={onClose}
                                 onSaved={() => onCreated()}
+                                selectedDate={selectedDate}
+                                stepsEditable
                             />
                         </>
                     )}
@@ -71,8 +86,12 @@ export function TaskModal({
                             defaultDate={defaultDate}
                             key={state.task.id}
                             moves={moves}
+                            isStepPending={isStepPending}
+                            onClearStepError={onClearStepError}
                             onClose={onClose}
+                            onToggleStep={onToggleStep}
                             selectedDate={selectedDate}
+                            stepError={stepError?.taskId === state.task.id ? stepError : null}
                             task={state.task}
                         />
                     )}
@@ -105,17 +124,29 @@ function TaskModalHeader({ title }: TaskModalHeaderProps) {
 
 interface TaskRecordContentProps {
     defaultDate: LocalDate;
+    isStepPending: boolean;
     moves: TaskMoves;
+    onClearStepError: () => void;
     onClose: () => void;
+    onToggleStep: (
+        task: TaskView,
+        stepId: string,
+        isCompleted: boolean,
+    ) => Promise<TaskView | null>;
     selectedDate: LocalDate;
+    stepError: { taskId: string; message: string } | null;
     task: TaskView;
 }
 
 function TaskRecordContent({
     defaultDate,
+    isStepPending,
     moves,
+    onClearStepError,
     onClose,
+    onToggleStep,
     selectedDate,
+    stepError,
     task,
 }: TaskRecordContentProps) {
     const { t } = useTranslation();
@@ -163,6 +194,8 @@ function TaskRecordContent({
                     initial={record.data}
                     onCancel={() => setIsEditing(false)}
                     onSaved={() => setIsEditing(false)}
+                    selectedDate={selectedDate}
+                    stepsEditable={currentTask.status !== 'completed'}
                 />
             </>
         );
@@ -175,7 +208,11 @@ function TaskRecordContent({
                 moves={moves}
                 onDeleted={onClose}
                 onEdit={() => setIsEditing(true)}
+                isStepPending={isStepPending}
+                onClearStepError={onClearStepError}
+                onToggleStep={onToggleStep}
                 record={record.data}
+                stepError={stepError}
                 task={currentTask}
             />
         </>
@@ -183,10 +220,18 @@ function TaskRecordContent({
 }
 
 interface TaskDetailsProps {
+    isStepPending: boolean;
     moves: TaskMoves;
+    onClearStepError: () => void;
     onDeleted: () => void;
     onEdit: () => void;
+    onToggleStep: (
+        task: TaskView,
+        stepId: string,
+        isCompleted: boolean,
+    ) => Promise<TaskView | null>;
     record: TaskRecordView;
+    stepError: { taskId: string; message: string } | null;
     task: TaskView;
 }
 
@@ -203,7 +248,17 @@ function deleteErrorMessage(t: TFunction, error: unknown): string {
     return t('tasks.modal.deleteUnavailable');
 }
 
-function TaskDetails({ moves, onDeleted, onEdit, record, task }: TaskDetailsProps) {
+function TaskDetails({
+    isStepPending,
+    moves,
+    onClearStepError,
+    onDeleted,
+    onEdit,
+    onToggleStep,
+    record,
+    stepError,
+    task,
+}: TaskDetailsProps) {
     const { t } = useTranslation();
     const deleteTask = useDeleteTask();
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -220,6 +275,10 @@ function TaskDetails({ moves, onDeleted, onEdit, record, task }: TaskDetailsProp
         }
     }
 
+    function requestMove(movingTask: TaskView, status: TaskStatus) {
+        void moves.move(movingTask, status, 'menu');
+    }
+
     return (
         <div className="flex flex-col gap-4">
             {record.details !== null && (
@@ -228,11 +287,29 @@ function TaskDetails({ moves, onDeleted, onEdit, record, task }: TaskDetailsProp
                     {record.details}
                 </p>
             )}
+            <TaskStepList
+                isPending={isStepPending || isMoving}
+                onToggleStep={onToggleStep}
+                task={task}
+            />
+            {stepError !== null && (
+                <StatusMessage
+                    action={
+                        <Button onClick={onClearStepError} size="sm" variant="outline">
+                            {t('common.dismiss')}
+                        </Button>
+                    }
+                    title={t('tasks.steps.updateFailedTitle')}
+                    tone="error"
+                >
+                    {stepError.message}
+                </StatusMessage>
+            )}
             <div className="flex flex-wrap items-center gap-2">
                 <TaskStatusMenu
                     isPending={moves.pendingTaskIds.has(task.id)}
                     onFocused={moves.clearFocusTarget}
-                    onMove={(movingTask, status) => moves.move(movingTask, status, 'menu')}
+                    onMove={requestMove}
                     shouldFocus={
                         moves.focusTarget?.taskId === task.id &&
                         moves.focusTarget.status === task.status

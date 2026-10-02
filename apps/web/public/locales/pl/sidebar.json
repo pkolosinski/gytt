@@ -1,0 +1,15 @@
+{
+  "home": "Strona główna GYTT",
+  "menu": "Menu",
+  "openMenu": "Otwórz menu",
+  "collapseSidebar": "Zwiń panel boczny",
+  "expandSidebar": "Rozwiń panel boczny",
+  "preferences": "Preferencje",
+  "darkTheme": "Ciemny motyw",
+  "language": "Język",
+  "sections": {
+    "dashboard": "Pulpit",
+    "tasks": "Zadania",
+    "habits": "Nawyki"
+  }
+}

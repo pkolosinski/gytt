@@ -1,5 +1,3 @@
-import { useId } from 'react';
-
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from 'cn';
 import { CalendarClock } from 'lucide-react';
@@ -8,24 +6,35 @@ import { useTranslation } from 'react-i18next';
 import { formatLocalDateShort, type LocalDate } from '@/shared/lib/local-date.ts';
 
 import type { TaskView } from '../models/task.ts';
+import { TaskStepList } from './TaskStepList.tsx';
 
 export const taskCardClassName =
-    'flex h-28 flex-col gap-1 rounded-lg bg-background p-2 text-left text-sm shadow-xs ring-1 ring-foreground/10';
+    'flex min-h-28 flex-col gap-2 rounded-lg bg-background p-3 text-left text-sm shadow-xs ring-1 ring-foreground/10';
 
 interface StandardTaskCardProps {
     isPending: boolean;
     onOpen: (task: TaskView) => void;
+    onToggleStep: (
+        task: TaskView,
+        stepId: string,
+        isCompleted: boolean,
+    ) => Promise<TaskView | null>;
     selectedDate: LocalDate;
     task: TaskView;
 }
 
 /**
- * A standard Task card. Its title opens the Task details, and the card can be
- * dragged with a mouse to move it between columns.
+ * The card opens its Task details and can be dragged; Step checkboxes remain
+ * independently interactive.
  */
-export function StandardTaskCard({ isPending, onOpen, selectedDate, task }: StandardTaskCardProps) {
-    const titleId = useId();
-    const { isDragging, listeners, setNodeRef } = useDraggable({
+export function StandardTaskCard({
+    isPending,
+    onOpen,
+    onToggleStep,
+    selectedDate,
+    task,
+}: StandardTaskCardProps) {
+    const { isDragging, listeners, setActivatorNodeRef, setNodeRef } = useDraggable({
         disabled: isPending,
         id: task.id,
     });
@@ -33,7 +42,6 @@ export function StandardTaskCard({ isPending, onOpen, selectedDate, task }: Stan
     return (
         <article
             aria-busy={isPending}
-            aria-labelledby={titleId}
             className={cn(
                 taskCardClassName,
                 'relative transition-[box-shadow,opacity] hover:shadow-sm hover:ring-foreground/20',
@@ -42,17 +50,28 @@ export function StandardTaskCard({ isPending, onOpen, selectedDate, task }: Stan
             )}
             data-task-id={task.id}
             ref={setNodeRef}
-            {...listeners}
         >
             <button
-                className="cursor-pointer text-left text-base font-medium text-foreground outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:ring-3 focus-visible:after:ring-ring/50"
-                id={titleId}
+                aria-label={task.title}
+                className="absolute inset-0 z-0 cursor-grab rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:cursor-grabbing"
+                {...listeners}
+                data-task-title
                 onClick={() => onOpen(task)}
+                ref={setActivatorNodeRef}
                 type="button"
-            >
-                <TaskTitle task={task} />
-            </button>
-            <TaskCardDetails selectedDate={selectedDate} task={task} />
+            />
+            <div className="pointer-events-none relative z-10 flex min-w-0 flex-col gap-2">
+                <span
+                    aria-hidden="true"
+                    className="text-base font-medium text-foreground"
+                    data-task-title-text
+                >
+                    <TaskTitle task={task} />
+                </span>
+                <TaskCardDetails task={task} />
+                <TaskStepList isPending={isPending} onToggleStep={onToggleStep} task={task} />
+                <TaskCardSince selectedDate={selectedDate} task={task} />
+            </div>
         </article>
     );
 }
@@ -75,7 +94,9 @@ export function TaskCardPreview({ selectedDate, task }: TaskCardPreviewProps) {
             <span className="font-medium break-words text-foreground">
                 <TaskTitle task={task} />
             </span>
-            <TaskCardDetails selectedDate={selectedDate} task={task} />
+            <TaskCardDetails task={task} />
+            <TaskStepList isPending task={task} />
+            <TaskCardSince selectedDate={selectedDate} task={task} />
         </div>
     );
 }
@@ -98,14 +119,10 @@ function TaskTitle({ task }: TaskTitleProps) {
 }
 
 interface TaskCardDetailsProps {
-    selectedDate: LocalDate;
     task: TaskView;
 }
 
-function TaskCardDetails({ selectedDate, task }: TaskCardDetailsProps) {
-    const { i18n, t } = useTranslation();
-    const isCarriedForward = task.startDate < selectedDate;
-
+function TaskCardDetails({ task }: TaskCardDetailsProps) {
     return (
         <>
             {task.details !== null && (
@@ -113,14 +130,27 @@ function TaskCardDetails({ selectedDate, task }: TaskCardDetailsProps) {
                     {task.details}
                 </p>
             )}
-            {isCarriedForward && (
-                <span className="inline-flex min-w-0 items-center gap-1 truncate text-xs text-muted-foreground">
-                    <CalendarClock aria-hidden="true" className="size-3.5" />
-                    {t('tasks.card.since', {
-                        date: formatLocalDateShort(task.startDate, i18n.language),
-                    })}
-                </span>
-            )}
         </>
+    );
+}
+
+interface TaskCardSinceProps {
+    selectedDate: LocalDate;
+    task: TaskView;
+}
+
+function TaskCardSince({ selectedDate, task }: TaskCardSinceProps) {
+    const { i18n, t } = useTranslation();
+    const isCarriedForward = task.startDate < selectedDate;
+    if (!isCarriedForward) {
+        return null;
+    }
+    return (
+        <span className="inline-flex min-w-0 items-center gap-1 truncate text-xs text-muted-foreground">
+            <CalendarClock aria-hidden="true" className="size-3.5" />
+            {t('tasks.card.since', {
+                date: formatLocalDateShort(task.startDate, i18n.language),
+            })}
+        </span>
     );
 }

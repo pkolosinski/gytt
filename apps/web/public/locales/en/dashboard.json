@@ -1,0 +1,21 @@
+{
+  "eyebrow": "Get Your Things Together",
+  "title": "Make today count.",
+  "subtitle": "A calm place for the things you want to do and keep doing.",
+  "modulesLabel": "GYTT modules",
+  "today": "Today",
+  "modules": {
+    "tasks": {
+      "title": "Tasks",
+      "description": "Plan, organize, and complete your daily work.",
+      "prompt": "Turn your plans into a clear next step.",
+      "openLabel": "Open tasks"
+    },
+    "habits": {
+      "title": "Habits",
+      "description": "Build consistency with daily, weekly, and monthly habits.",
+      "prompt": "Keep the routines that matter moving forward.",
+      "openLabel": "Open habits"
+    }
+  }
+}

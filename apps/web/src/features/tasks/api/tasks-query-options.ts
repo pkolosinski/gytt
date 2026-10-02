@@ -10,6 +10,7 @@ export const taskQueryKeys = {
     boards: ['tasks', 'board'] as const,
     move: ['tasks', 'move'] as const,
     record: (taskId: string) => ['tasks', 'record', taskId] as const,
+    toggleStep: ['tasks', 'toggle-step'] as const,
 };
 
 /** Query options usable with hooks, prefetching, and direct cache access. */

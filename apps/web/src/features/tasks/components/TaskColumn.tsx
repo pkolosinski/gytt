@@ -17,9 +17,15 @@ const LOADING_CARDS = 2;
 interface TaskColumnProps {
     /** The Task being dragged, if any; columns other than its own accept the drop. */
     draggedTask: TaskView | null;
+    isStepPending: boolean;
     items: readonly TaskBoardItem[] | null;
     onCreateTask: (status: TaskStatus) => void;
     onOpenTask: (task: TaskView) => void;
+    onToggleStep: (
+        task: TaskView,
+        stepId: string,
+        isCompleted: boolean,
+    ) => Promise<TaskView | null>;
     pendingTaskIds: ReadonlySet<string>;
     selectedDate: LocalDate;
     status: TaskStatus;
@@ -32,9 +38,11 @@ interface TaskColumnProps {
  */
 export function TaskColumn({
     draggedTask,
+    isStepPending,
     items,
     onCreateTask,
     onOpenTask,
+    onToggleStep,
     pendingTaskIds,
     selectedDate,
     status,
@@ -89,8 +97,9 @@ export function TaskColumn({
                 {items?.map((item) => (
                     <li key={item.task.id}>
                         <StandardTaskCard
-                            isPending={pendingTaskIds.has(item.task.id)}
+                            isPending={isStepPending || pendingTaskIds.has(item.task.id)}
                             onOpen={onOpenTask}
+                            onToggleStep={onToggleStep}
                             selectedDate={selectedDate}
                             task={item.task}
                         />

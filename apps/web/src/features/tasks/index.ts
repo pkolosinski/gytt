@@ -1,13 +1,15 @@
 export { createMockTasksApi } from './api/mock-tasks-api.ts';
+export { createMockTasksDataSource, createSampleTasks } from './api/mock-tasks-data-source.ts';
 export { TaskApiError } from './api/task-api-error.ts';
 export { tasksApi, type TasksApi } from './api/tasks-api.ts';
 export { TaskBoard } from './components/TaskBoard.tsx';
 export { TaskBoardError } from './components/TaskBoardError.tsx';
+export { TaskCompletionDialog } from './components/TaskCompletionDialog.tsx';
 export { TaskDateNavigation } from './components/TaskDateNavigation.tsx';
 export { TaskDateNotFound } from './components/TaskDateNotFound.tsx';
 export { TaskModal, type TaskModalState } from './components/TaskModal.tsx';
 export { TasksDataSourceProvider } from './components/TasksDataSourceProvider.tsx';
 export { tasksPath } from './helpers/task-routes.ts';
 export { useTaskMoves } from './hooks/task-moves.ts';
-export { useTaskBoard } from './hooks/task-queries.ts';
-export type { TaskRecordView } from './models/task.ts';
+export { useTaskBoard, useToggleTaskStep } from './hooks/task-queries.ts';
+export type { TaskRecordView, TaskStep, TaskView } from './models/task.ts';

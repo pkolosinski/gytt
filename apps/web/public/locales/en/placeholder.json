@@ -1,0 +1,8 @@
+{
+  "badge": "Placeholder",
+  "cardTitle": "Workspace coming next",
+  "cardDescription": "The route is connected and ready for the next implementation slice.",
+  "ready": "{{module}} navigation is ready.",
+  "notIncluded": "Domain behavior and saved data are not part of this placeholder.",
+  "backToDashboard": "Back to dashboard"
+}

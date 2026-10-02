@@ -2,25 +2,26 @@
 
 ## Current State (required)
 
-Verified directly against the repository on 2026-09-04.
+Verified directly against the repository on 2026-10-01.
 
-- Files in scope are `CONTEXT.md`, `docs/specs/CHG-001/product.md`, this specification, the accepted ADRs under `docs/adr/`, and the templates under `docs/spec-templates/`.
-- No application source, build configuration, dependency manifest, API schema, database schema, migration, test, deployment configuration, or operational script exists.
-- No Dashboard, Tasks, Habits, access boundary, persistence, contract, or web behavior exists.
-- ADRs 0001 through 0007 record accepted greenfield decisions; no implementation predates them.
-- `docs/specs/CHG-001/plan.md` is the task index, with one linked task file per implementation task; regenerate the index and affected task files after this revision.
-- The repository is not initialized as a Git repository.
+- The web application contains a mock-backed Anytime Tasks board, editor, and details modal. Its task data is in-memory and is not persistent.
+- Fixed-day Tasks, the Tasks OpenAPI contract, and Tasks-specific server endpoints are still planned. `apps/server` currently contains infrastructure and health/readiness behavior.
+- `settings.gradle.kts` includes `core:task`, which currently has no production source. The Task capability's public facade and persistence adapter remain to be implemented.
+- CHG-001 has application source, build configuration, tests, and deployment configuration; its implementation tasks are tracked in `docs/specs/CHG-001/plan.md` and linked task files.
+- ADRs 0001 through 0010 record the accepted local-first architecture and module boundaries.
 
 ## Architecture Delta (required)
 
-Build one monorepo containing `apps/server`, `apps/web`, `core/tasks`, `core/habits`, and `contracts/openapi.yaml`. CHG-001 does not create an Android application, but the Tasks and Habits core modules are built for later reuse by the offline-first Android client.
+Build one monorepo containing `apps/server`, `apps/web`, `core/task`, `core/habit`, and `contracts/openapi.yaml`. CHG-001 does not create an Android application, but the Tasks and Habits core modules are built for later reuse by the offline-first Android client.
 
 The responsive React/TypeScript SPA and `/api/v1` share one HTTPS origin. An existing user-operated reverse proxy is the only browser-facing endpoint and requires one shared HTTP Basic Auth credential for the entire origin. It rejects unauthenticated requests before forwarding and strips the `Authorization` header. The reverse proxy is co-located on the home-server host. Compose publishes the Kotlin/JVM application listener only on an operator-selected `127.0.0.1` host socket, and the proxy forwards to that exact loopback socket. LAN interfaces never bind the application listener. Couchbase Server runs separately in the same Compose project on the private data network. Its management console is published only on the host loopback socket for local operator access; data and query ports remain unpublished. A future Android change adds a self-hosted Sync Gateway as the mobile sync boundary; it does not connect Couchbase Lite directly to Couchbase Server.
 
 The backend has two owning product capabilities:
 
-- **Tasks** owns Anytime and Fixed-day task lifecycle, effective-dated status transitions, date visibility, its Couchbase collection, its Dashboard card read model, and the composite Tasks-board endpoint.
+- **Tasks** owns Anytime and Fixed-day Task lifecycle, effective-dated status transitions, date visibility, optional Steps on standard Tasks, its Couchbase collection, its Dashboard card read model, and the composite Tasks-board endpoint.
 - **Habits** owns Habit definitions, Habit occurrences, progress, archives, Completion rate, per-Habit Target attainment, its Couchbase collections, and its Dashboard card read model and endpoint.
+
+Steps are short, checked or unchecked text entries embedded in their standard Task; they are not child Task aggregates. Their checked state is shared across dates, while permission to edit them is resolved from the Task status on the requested date. Moving a Task directly to Completed checks all open Steps as part of the same Task mutation without confirmation. Checking a Step on a To do date also appends an In progress transition for that date; checking the final open Step opens a simple confirmation to move the Task to Completed. Choosing "No" leaves the Step checked and the Task in its current status; choosing "Yes" moves the Task to Completed. Habit occurrences never own Steps.
 
 There is no backend Dashboard module. The React Dashboard independently loads the Tasks and Habits summary endpoints. A query-only `daily-overview` module may be introduced later if cross-capability or materially more complex projections justify dedicated storage and synchronization.
 
@@ -128,14 +129,15 @@ Every error contains:
 
 Common application errors are `MALFORMED_REQUEST` (`400`), `ORIGIN_REJECTED` (`403`), `NOT_FOUND` (`404`), `VERSION_CONFLICT`, `ID_REUSED`, `LATER_TASK_STATUS_EXISTS`, `TASK_ALREADY_CONVERTED`, or `HABIT_HAS_HISTORY` (`409`), `VALIDATION_FAILED` or `INVALID_CALENDAR_OPERATION` (`422`), and `STORAGE_UNAVAILABLE`, `TRANSACTION_FAILED`, or `COMMIT_UNKNOWN` (`503`). The reverse proxy owns Basic Auth failures and returns `401` with `WWW-Authenticate`; that response is outside the application problem contract.
 
-Titles contain 1–200 Unicode code points after trimming, details at most 5,000, and units at most 32. Oversized values return `422`; a request body over 64 KiB returns `413 PAYLOAD_TOO_LARGE`.
+Titles and Step text contain 1–200 Unicode code points after trimming, details at most 5,000, and units at most 32. Oversized values return `422`; a request body over 64 KiB returns `413 PAYLOAD_TOO_LARGE`. Step count has no separate business limit and is bounded by the request-body limit.
 
 Shared schemas:
 
-- `TaskInput` is either `{ id: UUID, type: "anytime", title: string, details: string | null, startDate: LocalDate }` or `{ id: UUID, type: "fixedDay", title: string, details: string | null, fixedDate: LocalDate }`.
+- `TaskStep` is `{ id: UUID, text: string, isCompleted: boolean }`; the array has no user-controlled ordering.
+- `TaskInput` is either `{ id: UUID, type: "anytime", title: string, details: string | null, startDate: LocalDate, steps: TaskStep[] }` or `{ id: UUID, type: "fixedDay", title: string, details: string | null, fixedDate: LocalDate, steps: TaskStep[] }`.
 - `TaskStatus` is `"todo"`, `"inProgress"`, or `"completed"`.
-- `TaskView` adds `status: TaskStatus`, `statusEffectiveDate: LocalDate`, `convertedHabitId: UUID | null`, and `version: string`. List views resolve status for their requested date and do not include the full transition history.
-- `TaskRecordView` is the date-independent record used for details and conflict recovery: `{ id, type, title, details, startDate, fixedDate, latestStatus, latestStatusEffectiveDate, convertedHabitId, version }`. It does not expose the full transition history.
+- `TaskView` adds `status: TaskStatus`, `statusEffectiveDate: LocalDate`, `convertedHabitId: UUID | null`, and `version: string`. List views resolve status for their requested date and do not include the full transition history. Steps are present in every date view and reflect the current shared Step state.
+- `TaskRecordView` is the date-independent record used for details and conflict recovery: `{ id, type, title, details, startDate, fixedDate, latestStatus, latestStatusEffectiveDate, convertedHabitId, steps, version }`. It does not expose the full transition history.
 - `Schedule` is `{ type: "daily" }`, `{ type: "selectedDays", isoWeekdays: integer[] }`, `{ type: "weekly" }`, or `{ type: "monthly" }`. ISO weekdays are unique integers `1..7`, Monday first.
 - `Target` is `{ type: "binary" }` or `{ type: "numeric", amount: DecimalString, unit: string | null }`; numeric amount is greater than zero.
 - `HabitDefinitionInput` is `{ id: UUID, effectiveDate: LocalDate, schedule: Schedule, target: Target }`.
@@ -170,9 +172,10 @@ All reads are reachable only after reverse-proxy authentication and return `422 
 
 Task mutations:
 
-- `POST /api/v1/tasks` creates `TaskInput` with an optional `initialStatus: TaskStatus` (default To do) and returns `201 TaskView`. An identical same-ID retry, including the same initial status, returns `200` while the Task still exists; different content or a consumed-ID receipt for that ID returns `409 ID_REUSED`.
-- `PUT /api/v1/tasks/{taskId}` accepts `TaskInput` plus `version`; IDs must match. It returns `200 TaskView`. Status history remains unchanged, and an Anytime Task's start date cannot move after an existing transition.
-- `PUT /api/v1/tasks/{taskId}/status` accepts `status: TaskStatus`, `effectiveDate: LocalDate`, `clientToday: LocalDate`, `discardLaterTransitions: boolean`, and `version: string`; returns `200 TaskView`. Any state-to-state movement is allowed. For Anytime Tasks, `effectiveDate` is the selected board date and cannot precede start. For Fixed-day Tasks, it must equal the fixed date even when corrected later.
+- `POST /api/v1/tasks` creates `TaskInput` with an optional `initialStatus: TaskStatus` (default To do) and returns `201 TaskView`. When `initialStatus` is Completed, all supplied Steps are stored as completed. An identical same-ID retry, including the same initial status, returns `200` while the Task still exists; different content or a consumed-ID receipt for that ID returns `409 ID_REUSED`.
+- `PUT /api/v1/tasks/{taskId}` accepts `TaskInput`, `effectiveDate`, and `version`; IDs must match. Changing Step text or membership is rejected with `422 INVALID_CALENDAR_OPERATION` when the Task is Completed on that date. It returns `200 TaskView`. Status history remains unchanged, and an Anytime Task's start date cannot move after an existing transition.
+- `PUT /api/v1/tasks/{taskId}/steps/{stepId}` accepts `isCompleted`, `effectiveDate`, and `version`; it returns `200 TaskView`. It rejects a Step change when the Task is Completed on the selected date. Checking a Step when the Task is To do on that date atomically appends an In progress transition effective on that date. Step state remains shared across dates.
+- `PUT /api/v1/tasks/{taskId}/status` accepts `status: TaskStatus`, `effectiveDate: LocalDate`, `clientToday: LocalDate`, `discardLaterTransitions: boolean`, and `version: string`; returns `200 TaskView`. Any state-to-state movement is allowed. Moving to Completed atomically checks all open Steps; moving away from Completed preserves their state. For Anytime Tasks, `effectiveDate` is the selected board date and cannot precede start. For Fixed-day Tasks, it must equal the fixed date even when corrected later.
 - Status changes append an effective-dated transition and retain earlier logs. Repeating the same desired status for the same effective date is idempotent. If an Anytime Task is completed before a later completion, `discardLaterTransitions: false` returns `409 LATER_TASK_STATUS_EXISTS`; after UI confirmation, the same request with `true` removes all later status logs and applies the earlier completion. Other historical transitions preserve later logs.
 - `DELETE /api/v1/tasks/{taskId}?version={version}` permanently removes the Task's personal content and replaces it with a consumed-ID receipt, then returns `204`. UI confirmation is required before calling. An identical retry against the receipt returns `204`; the receipt prevents delayed create retries from reviving the Task.
 - `POST /api/v1/tasks/{taskId}/convert-to-habit` accepts `taskVersion`, `completionDate`, `discardLaterTransitions`, and `habit: HabitInput`; returns `200 { task, habit }`. The caller supplies the Habit and initial definition-version IDs. The transaction inserts the Habit, completes and references the Task, and increments the Tasks-board composition revision. An identical retry using the original IDs returns the converted result without another revision increment. If `convertedHabitId` already names a different conversion, the response is `409 TASK_ALREADY_CONVERTED`. If conversion backdates completion before a later completion, false returns `409 LATER_TASK_STATUS_EXISTS`; true removes later logs atomically with conversion. A known rollback returns `503 TRANSACTION_FAILED`; an unresolved ambiguous commit returns `503 COMMIT_UNKNOWN`.
@@ -229,12 +232,12 @@ All components are internal and have no existing caller compatibility surface.
 - `TaskSummaryCard(summary: TaskDaySummary | null, state, onRetry)` owns its loading, error, and retry presentation.
 - `HabitSummaryCard(summary: HabitDaySummary | null, state, onRetry)` owns its loading, error, and retry presentation.
 - `TasksPage(date: LocalDate)` owns the selected date, the composite Task-board query, and the local Task-modal state.
-- `TaskBoard(view: TaskBoardView, selectedDate: LocalDate)` renders the three status columns and coordinates accessible card movement.
+- `TaskBoard(view: TaskBoardView, selectedDate: LocalDate)` renders the three status columns and coordinates accessible card movement and Step updates. `TasksPage` owns confirmation when a whole Task is moved to Completed.
 - `TaskColumn(status: TaskStatus, items: TaskBoardItem[], onCreate)` retains its heading, empty body, and footer create action when it has no cards.
-- `StandardTaskCard(task: TaskView, selectedDate, isPending, onOpen)` supports mouse drag-and-drop without a status control; keyboard and touch status changes use the menu in Task details.
+- `StandardTaskCard(task: TaskView, selectedDate, isPending, onOpen, onToggleStep)` shows the full Step checklist and supports mouse drag-and-drop without a status control; Step controls do not start a drag. Keyboard and touch status changes use the menu in Task details.
 - `HabitTaskCard(occurrence: HabitOccurrenceView, onOpen, onSetProgress)` renders distinct Habit styling and inline progress; its column is derived from progress and cannot be changed by dragging.
-- `TaskModal(item: TaskBoardItem | null, mode, onSaved, onClose)` owns the standard Task create/details/edit/copy/convert/delete workflows or shows simple Habit occurrence details and a link to the matching Habits period. Copy is available for any standard Task; the explicit product path for a non-completed historical Fixed-day Task remains supported.
-- `TaskEditor(initial: TaskView | TaskRecordView | null, defaultDate: LocalDate, onSaved, onCancel)` owns title/description draft state; creation assigns Today internally, and edits preserve the saved start date without exposing it.
+- `TaskModal(item: TaskBoardItem | null, mode, onSaved, onClose)` owns the standard Task create/details/edit/copy/convert/delete workflows, including Step checkboxes in Task details, or shows simple Habit occurrence details and a link to the matching Habits period.
+- `TaskEditor(initial: TaskView | TaskRecordView | null, defaultDate: LocalDate, selectedDate: LocalDate, stepsEditable, onSaved, onCancel)` owns title/description and Step-text draft state; creation assigns Today internally, and edits preserve the saved start date without exposing it. Step text controls are disabled when the Task is Completed on the selected date.
 - `HabitsPage(period: PeriodRef, asOf: LocalDate)` owns the period query and navigation.
 - `HabitCreateModal(period: PeriodRef, onSaved, onClose)` owns local creation state and does not change the route.
 - `HabitDetailsPanel(habitId, period, mode)` owns details, history, metrics, effective-dated editing, archive, and delete actions; responsive layout changes do not change its route.
@@ -252,9 +255,11 @@ All pages and controls render on the client. Server data is owned by route-level
 - Dashboard begins with a static non-personalized greeting. Empty Dashboard Tasks shows zero completed and remaining. Empty Dashboard Habits shows “No habits scheduled today,” no percentage, and no unfinished items.
 - A failed Dashboard card request leaves the other card visible and gives only the failed card a retry action.
 - The Tasks board is one bordered surface: a shared header row with each column's status icon, label, and count; vertical column dividers; and horizontally divided task rows rather than separate cards. Each column keeps list semantics rather than table semantics because rows across columns are unrelated.
-- All standard Task cards use a consistent compact height; titles use one line at a larger size than the two-line description, with carried-forward date information fitting below.
-- Every column ends with a "Create" footer action, directly after its last row, that opens the create form with that column's status. The page header groups date navigation and a "New task" action that defaults to To do. The "Create new task" form asks only for a title and optional description; it assigns the current device-local date as the start date without exposing a date or status control.
-- Creating a Task closes the modal and returns to the refreshed board. Opening a Task shows its title, a "Description:" line only when a description is present, and an interactive status menu for the selected board date at the left of the action row. Edit and Delete are grouped on the right; Delete opens a named confirmation before removing the Task. The status menu applies changes to the selected board date, moves the card, and announces the result. Neither details nor edit views expose the Anytime type or start date; edits preserve the saved start date.
+- Standard Task cards have slightly increased padding and a compact base height, then grow to show every Step checkbox. A divider separates Steps from other Task content, and carried-forward date information appears at the bottom after Steps. Titles use one line at a larger size than the two-line description. The whole card opens and can be dragged from any area except its Step checkboxes.
+- Every column ends with a "Create" footer action, directly after its last row, that opens the create form with that column's status. The page header groups date navigation and a "New task" action that defaults to To do. The "Create new task" form marks the required title with an asterisk and asks for an optional description and optional Step text without "(optional)" labels; it assigns the current device-local date as the start date without exposing a date or status control.
+- Creating a Task closes the modal and returns to the refreshed board. Opening a Task shows its title, a "Description:" line only when a description is present, its Steps when present, and an interactive status menu for the selected board date at the left of the action row. Step checkboxes are enabled only when the Task is not Completed on the selected date. Edit and Delete are grouped on the right; Delete opens a named confirmation before removing the Task. The status menu applies changes to the selected board date, moves the card, and announces the result. Neither details nor edit views expose the Anytime type or start date; edits preserve the saved start date.
+- A Step check changes the shared checklist for every date. The selected date determines whether editing is allowed and whether checking a Step moves a To do Task to In progress. Checking the final open Step opens a confirmation titled "Move task [title] to Completed" with only "Yes" and "No" buttons; "No" leaves the Step checked and the Task status unchanged, while "Yes" moves the Task to Completed on the selected date.
+- Moving the whole Task to Completed from the board or its status menu applies immediately without confirmation and checks all open Steps. Steps are locked on dates where the Task's effective status is Completed. Moving it away does not reset the checks and enables editing on dates where its effective status is not Completed. A Task created directly in Completed starts with its Steps checked.
 - An empty Tasks board preserves all three column headings and footer create actions and renders no message or placeholder inside their bodies.
 - On narrow screens, the Tasks columns remain side by side in one horizontally scrollable, snap-aligned board region. The application shell and page do not overflow horizontally.
 - Standard Task cards can be dragged between columns with a mouse and do not display a status control. Keyboard and touch users open Task details and change status with its menu; the menu preserves focus and announces the result. Touch scrolling of the board is never hijacked.
@@ -296,7 +301,7 @@ The current Compose bootstrap creates the zero-replica `gytt` bucket and the `ta
 
 Entities:
 
-- `TaskDocument`: `id`, `revision: integer`, `type`, `title`, `details`, `startDate: LocalDate | null`, `fixedDate: LocalDate | null`, `nextStatusSequence: integer`, `statusTransitions: TaskStatusTransition[]`, `convertedHabitId: UUID | null`, `createdAt`, `updatedAt`.
+- `TaskDocument`: `id`, `revision: integer`, `type`, `title`, `details`, `startDate: LocalDate | null`, `fixedDate: LocalDate | null`, `steps: TaskStep[]`, `nextStatusSequence: integer`, `statusTransitions: TaskStatusTransition[]`, `convertedHabitId: UUID | null`, `createdAt`, `updatedAt`.
 - `TaskConsumedIdReceipt`: stored at the former Task key with `documentType: "consumedTaskId"`, canonical `id`, `deletionRevision`, and `deletedAt`. It contains no former Task content and is never returned as a Task.
 - `TaskStatusTransition`: `sequence: integer`, `effectiveDate: LocalDate`, `status: TaskStatus`, `recordedAt: timestamp`. Sequence is allocated monotonically inside the CAS-guarded Task write. Transitions resolve by effective date and then sequence; `recordedAt` is diagnostic and never breaks ties. Creation establishes the requested initial status (To do by default) on the Task's start or fixed date.
 - `TaskBoardCompositionRevisionDocument`: singleton key `task-board-composition::current` with `revision: integer` and `updatedAt`. Only a newly committed Task-to-Habit conversion increments it.
@@ -509,6 +514,38 @@ Scenario: Reopen a completed Anytime task
   Given an Anytime task was completed and a later status transition reopens it
   When a board on or after the reopening date is viewed
   Then the Task is visible in the column resolved from the later transition
+
+Scenario: Check a Step on a To do Task
+  Given a standard Task with an unchecked Step is To do on 2026-09-03
+  When the user checks that Step from the board card or Task details
+  Then the Step is checked and the Task becomes In progress effective 2026-09-03
+  And the checked Step is visible on every date where the Task appears
+
+Scenario: Checking the final Step does not complete the Task
+  Given an In progress Task has one unchecked Step
+  When the user checks that final Step
+  Then the Step is checked without a completion prompt
+  And the Task remains In progress
+
+Scenario: Confirm moving the whole Task to Completed
+  Given a standard Task has unchecked Steps
+  When the user moves the Task to Completed from the board or status menu
+  Then the UI asks for confirmation to complete the Task
+  When the user cancels
+  Then the Task status and Step states are unchanged
+  When the user confirms
+  Then the Task moves to Completed and all open Steps are checked
+
+Scenario: Complete open Steps when a Task moves to Completed
+  Given a standard Task has unchecked Steps
+  When the Task is moved to Completed on the selected date
+  Then all Steps are checked in the same Task update and are read-only on dates where the Task is Completed
+
+Scenario: Lock Step editing according to the displayed date
+  Given a Task is To do on 2026-09-02 and Completed on 2026-09-03
+  When the user checks a Step while viewing 2026-09-02
+  Then the Step is editable on 2026-09-02 and read-only on 2026-09-03
+  And both dates show the same current Step state
 
 Scenario: Reject completion before an Anytime task starts
   Given an Anytime task starts on 2026-09-04
@@ -843,7 +880,7 @@ Scenario: Report readiness only when Couchbase is usable
 - **Cross-capability application seam:** application tests drive conversion through the abstract unit of work and drive the Tasks-board composition coordinator through fake capability queries. They cover known rollback, ambiguous conversion, identical retry, rejected second conversion, board-revision changes between either query, bounded retry exhaustion, and responses that are wholly before or after conversion.
 - **HTTP and OpenAPI seam:** Ktor tests verify canonical UUID rejection before key construction, Task-by-ID conflict reload, OpenAPI mapping, status/error contracts, field validation, body limits, independent summary endpoints, composite-board responses, mutation contracts, occurrence versions, definition IDs, `LATER_TASK_STATUS_EXISTS`, `TASK_ALREADY_CONVERTED`, `HABIT_HAS_HISTORY`, `COMMIT_UNKNOWN`, timeout mapping, Origin enforcement, and the exact CSP header. They do not repeat core business-rule permutations.
 - **Persistence seam:** Testcontainers starts the pinned Couchbase release, creates the bucket, current collections, and bucket-scoped runtime user as test fixtures, then verifies the application identity can insert/read/query/delete the readiness document. Future feature slices add coverage for indexes, CAS, transactions, board revision fencing, and restart durability.
-- **Frontend component seam:** Vitest and Testing Library cover discriminated forms, successful Task/Habit edits, copy for each standard Task type, current-period route defaults and navigation, independent Dashboard states, board columns/cards, drag alternatives and announcements, Task-modal modes, conflict reload through Task-by-ID when a card leaves the board, literal text rendering, Habit progress controls, stale occurrence conflicts, Completed-section keyboard behavior, focus restoration, responsive route selection, browser reload, `TASK_ALREADY_CONVERTED`, `COMMIT_UNKNOWN`, and storage-error banners.
+- **Frontend component seam:** Vitest and Testing Library cover discriminated forms, successful Task/Habit edits, Task Step text and checkbox behavior, date-based Step locks, final-Step completion confirmation, immediate whole-Task moves to Completed, parent status transitions, copy for each standard Task type, current-period route defaults and navigation, independent Dashboard states, board columns/cards, whole-card drag and click behavior with checkbox isolation, drag alternatives and announcements, Task-modal modes, conflict reload through Task-by-ID when a card leaves the board, literal text rendering, Habit progress controls, stale occurrence conflicts, Completed-section keyboard behavior, focus restoration, responsive route selection, browser reload, `TASK_ALREADY_CONVERTED`, `COMMIT_UNKNOWN`, and storage-error banners.
 - **Operator deployment seam, not an automated browser or reverse-proxy suite:** the operator runs the built deployment through Basic Auth challenge/rejection, rate-limit recovery, authorization stripping, loopback-only reachability, trusted HTTPS without fallback, actual proxy/Ktor timeout ordering, supported real-browser layouts, browser restart, service/database restart, phone board containment, focus behavior, 200% zoom, private-only runtime traffic, backup, compatible rollback, and incompatible-schema restore. Results are recorded in the local acceptance checklist.
 - **Contract:** CI validates `contracts/openapi.yaml`; generated TypeScript calls execute against backend contract tests, and undocumented responses fail the build.
 - **Existing behavior:** none exists. Documentation structure and glossary terms must remain intact.

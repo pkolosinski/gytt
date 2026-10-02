@@ -4,12 +4,19 @@ export type TaskStatus = 'todo' | 'inProgress' | 'completed';
 
 export const TASK_STATUSES: readonly TaskStatus[] = ['todo', 'inProgress', 'completed'];
 
+export type TaskStep = {
+    id: string;
+    text: string;
+    isCompleted: boolean;
+};
+
 export type AnytimeTaskInput = {
     id: string;
     type: 'anytime';
     title: string;
     details: string | null;
     startDate: LocalDate;
+    steps: TaskStep[];
 };
 
 export type TaskInput = AnytimeTaskInput;
@@ -30,6 +37,7 @@ export type TaskRecordView = {
     details: string | null;
     startDate: LocalDate;
     fixedDate: null;
+    steps: TaskStep[];
     latestStatus: TaskStatus;
     latestStatusEffectiveDate: LocalDate;
     convertedHabitId: string | null;
@@ -39,6 +47,12 @@ export type TaskRecordView = {
 /** An effective-dated status change for one Task, applied on the viewed board date. */
 export type TaskMoveInput = {
     status: TaskStatus;
+    effectiveDate: LocalDate;
+    version: string;
+};
+
+export type TaskStepToggleInput = {
+    isCompleted: boolean;
     effectiveDate: LocalDate;
     version: string;
 };
@@ -54,3 +68,4 @@ export type TaskBoardView = {
 
 export const TITLE_MAX_LENGTH = 200;
 export const DETAILS_MAX_LENGTH = 5000;
+export const STEP_MAX_LENGTH = 200;

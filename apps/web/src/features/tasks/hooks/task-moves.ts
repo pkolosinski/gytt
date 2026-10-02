@@ -37,27 +37,30 @@ export function useTaskMoves(date: LocalDate) {
     const [errorTaskId, setErrorTaskId] = useState<string | null>(null);
     const [focusTarget, setFocusTarget] = useState<TaskFocusTarget | null>(null);
 
-    function move(task: TaskView, status: TaskStatus, source: TaskMoveSource) {
+    function move(task: TaskView, status: TaskStatus, source: TaskMoveSource): Promise<boolean> {
         setAnnouncement('');
         setError(null);
         setErrorTaskId(null);
         if (source === 'menu') {
             setFocusTarget({ status, taskId: task.id });
         }
-        moveTask.mutateAsync({ date, status, task }).then(
-            () =>
+        return moveTask.mutateAsync({ date, status, task }).then(
+            () => {
                 setAnnouncement(
                     t('tasks.moves.moved', {
                         status: t(`tasks.status.${status}`),
                         title: task.title,
                     }),
-                ),
+                );
+                return true;
+            },
             (cause: unknown) => {
                 setError(moveErrorMessage(t, task, cause));
                 setErrorTaskId(task.id);
                 if (source === 'menu') {
                     setFocusTarget({ status: task.status, taskId: task.id });
                 }
+                return false;
             },
         );
     }

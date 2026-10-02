@@ -6,6 +6,7 @@ import type {
     TaskMoveInput,
     TaskRecordView,
     TaskStatus,
+    TaskStepToggleInput,
     TaskView,
 } from '../models/task.ts';
 import { createMockTasksApi, createSampleTasks } from './mock-tasks-api.ts';
@@ -15,8 +16,14 @@ export type TasksApi = {
     getBoard(date: LocalDate): Promise<TaskBoardView>;
     getTask(taskId: string): Promise<TaskRecordView>;
     createTask(input: TaskInput, initialStatus: TaskStatus): Promise<TaskView>;
-    updateTask(taskId: string, input: TaskInput, version: string): Promise<TaskView>;
+    updateTask(
+        taskId: string,
+        input: TaskInput,
+        version: string,
+        effectiveDate: LocalDate,
+    ): Promise<TaskView>;
     moveTask(taskId: string, move: TaskMoveInput): Promise<TaskView>;
+    toggleStep(taskId: string, stepId: string, input: TaskStepToggleInput): Promise<TaskView>;
     deleteTask(taskId: string, version: string): Promise<void>;
 };
 

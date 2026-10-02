@@ -16,8 +16,7 @@
 - Keep browser concerns at this boundary; capability rules belong in `core/`
   or behind the server API.
 - Put every user-facing string in the `shared/i18n/locales/` dictionaries and
-  render it with `useTranslation`; add each key to every language (see ADR
-  0013).
+  render it with `useTranslation`; add each key to every language.
 
 ## shadcn/ui skill
 

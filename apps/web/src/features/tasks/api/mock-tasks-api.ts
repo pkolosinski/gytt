@@ -9,6 +9,8 @@ import type {
     TaskInput,
     TaskRecordView,
     TaskStatus,
+    TaskStep,
+    TaskStepToggleInput,
     TaskView,
 } from '../models/task.ts';
 import { TaskApiError } from './task-api-error.ts';
@@ -80,12 +82,29 @@ function seedTransitions(record: TaskRecordView): StatusTransition[] {
     ];
 }
 
+function copySteps(steps: readonly TaskStep[]): TaskStep[] {
+    return steps.map((step) => ({ ...step }));
+}
+
+function completeOpenSteps(steps: readonly TaskStep[]): TaskStep[] {
+    return steps.map((step) => ({ ...step, isCompleted: true }));
+}
+
+function copyRecord(record: TaskRecordView): TaskRecordView {
+    return { ...record, steps: copySteps(record.steps) };
+}
+
+function copyInput(input: TaskInput): TaskInput {
+    return { ...input, steps: copySteps(input.steps) };
+}
+
 function toTaskView(record: TaskRecordView, transition: StatusTransition): TaskView {
     return {
         convertedHabitId: record.convertedHabitId,
         details: record.details,
         id: record.id,
         startDate: record.startDate,
+        steps: copySteps(record.steps),
         status: transition.status,
         statusEffectiveDate: transition.effectiveDate,
         title: record.title,
@@ -100,6 +119,7 @@ function normalizeInput(input: TaskInput): TaskInput {
         details: details.length === 0 ? null : details,
         id: input.id,
         startDate: input.startDate,
+        steps: input.steps.map((step) => ({ ...step, text: step.text.trim() })),
         title: input.title.trim(),
         type: input.type,
     };
@@ -110,21 +130,44 @@ function assertValid(input: TaskInput): void {
         {
             details: input.details ?? '',
             startDate: input.startDate,
+            steps: input.steps,
             title: input.title,
         },
         t,
     );
+    if (input.steps.some((step) => step.text.trim().length === 0)) {
+        fields.steps = t('tasks.validation.stepRequired');
+    }
     if (Object.keys(fields).length > 0) {
         throw new TaskApiError('VALIDATION_FAILED', 'The Task is not valid.', fields);
     }
 }
 
-function hasSameContent(record: TaskRecordView, input: TaskInput): boolean {
+function hasSameSteps(left: readonly TaskStep[], right: readonly TaskStep[]): boolean {
     return (
-        record.type === input.type &&
-        record.title === input.title &&
-        record.details === input.details &&
-        record.startDate === input.startDate
+        left.length === right.length &&
+        left.every((step, index) => {
+            const inputStep = right[index];
+            return (
+                inputStep !== undefined &&
+                step.id === inputStep.id &&
+                step.text === inputStep.text &&
+                step.isCompleted === inputStep.isCompleted
+            );
+        })
+    );
+}
+
+function hasSameContent(
+    left: Pick<TaskInput, 'type' | 'title' | 'details' | 'startDate' | 'steps'>,
+    right: TaskInput,
+): boolean {
+    return (
+        left.type === right.type &&
+        left.title === right.title &&
+        left.details === right.details &&
+        left.startDate === right.startDate &&
+        hasSameSteps(left.steps, right.steps)
     );
 }
 
@@ -141,11 +184,14 @@ export function createMockTasksApi({
     tasks = [],
     delayMs = 0,
 }: MockTasksApiOptions = {}): TasksApi {
-    const records = new Map<string, TaskRecordView>(tasks.map((task) => [task.id, { ...task }]));
+    const records = new Map<string, TaskRecordView>(
+        tasks.map((task) => [task.id, copyRecord(task)]),
+    );
     const transitions = new Map<string, StatusTransition[]>(
         tasks.map((task) => [task.id, seedTransitions(task)]),
     );
     const deletedTaskIds = new Set<string>();
+    const createRequests = new Map<string, { initialStatus: TaskStatus; input: TaskInput }>();
 
     function requireRecord(taskId: string): TaskRecordView {
         const record = records.get(taskId);
@@ -170,6 +216,7 @@ export function createMockTasksApi({
             ...record,
             latestStatus: latest.status,
             latestStatusEffectiveDate: latest.effectiveDate,
+            steps: copySteps(record.steps),
         };
         records.set(saved.id, saved);
         transitions.set(saved.id, history);
@@ -181,15 +228,21 @@ export function createMockTasksApi({
             await wait(delayMs);
             assertValid(rawInput);
             const input = normalizeInput(rawInput);
+            const initialSteps =
+                initialStatus === 'completed' ? completeOpenSteps(input.steps) : input.steps;
             if (deletedTaskIds.has(input.id)) {
                 throw new TaskApiError('ID_REUSED', 'This Task ID was already used.');
             }
             const existing = records.get(input.id);
             if (existing !== undefined) {
-                if (
-                    hasSameContent(existing, input) &&
-                    transitionsOf(existing.id)[0]?.status === initialStatus
-                ) {
+                const originalRequest = createRequests.get(input.id);
+                const isSameRequest =
+                    originalRequest === undefined
+                        ? hasSameContent(existing, input) &&
+                          transitionsOf(existing.id)[0]?.status === initialStatus
+                        : originalRequest.initialStatus === initialStatus &&
+                          hasSameContent(originalRequest.input, input);
+                if (isSameRequest) {
                     return viewOn(existing, existing.startDate);
                 }
                 throw new TaskApiError('ID_REUSED', 'This Task ID was already used.');
@@ -201,10 +254,12 @@ export function createMockTasksApi({
                     fixedDate: null,
                     latestStatus: initialStatus,
                     latestStatusEffectiveDate: input.startDate,
+                    steps: initialSteps,
                     version: '1',
                 },
                 [{ effectiveDate: input.startDate, sequence: 0, status: initialStatus }],
             );
+            createRequests.set(input.id, { initialStatus, input: copyInput(input) });
             return viewOn(record, record.startDate);
         },
 
@@ -222,6 +277,7 @@ export function createMockTasksApi({
             }
             records.delete(taskId);
             transitions.delete(taskId);
+            createRequests.delete(taskId);
             deletedTaskIds.add(taskId);
         },
 
@@ -261,18 +317,78 @@ export function createMockTasksApi({
                 );
             }
             const history = transitionsOf(taskId);
-            if (resolveTransition(history, effectiveDate)?.status === status) {
+            const currentStatus = resolveTransition(history, effectiveDate)?.status;
+            if (currentStatus === status) {
                 return viewOn(current, effectiveDate);
             }
             const sequence = Math.max(...history.map((transition) => transition.sequence)) + 1;
             const record = save(
-                { ...current, version: nextVersion(current.version) },
+                {
+                    ...current,
+                    steps:
+                        status === 'completed' ? completeOpenSteps(current.steps) : current.steps,
+                    version: nextVersion(current.version),
+                },
                 [...history, { effectiveDate, sequence, status }].sort(compareTransitions),
             );
             return viewOn(record, effectiveDate);
         },
 
-        async updateTask(taskId, rawInput, version) {
+        async toggleStep(taskId: string, stepId: string, input: TaskStepToggleInput) {
+            await wait(delayMs);
+            const current = requireRecord(taskId);
+            if (current.version !== input.version) {
+                throw new TaskApiError('VERSION_CONFLICT', 'A newer version of this Task exists.');
+            }
+            if (input.effectiveDate < current.startDate) {
+                throw new TaskApiError(
+                    'INVALID_CALENDAR_OPERATION',
+                    'A Step cannot change before the Task starts.',
+                );
+            }
+            const history = transitionsOf(taskId);
+            const transition = resolveTransition(history, input.effectiveDate);
+            if (transition?.status === 'completed') {
+                throw new TaskApiError(
+                    'INVALID_CALENDAR_OPERATION',
+                    'Steps cannot change when the Task is completed on this date.',
+                );
+            }
+            const step = current.steps.find((candidate) => candidate.id === stepId);
+            if (step === undefined) {
+                throw new TaskApiError('NOT_FOUND', 'The Step no longer exists.');
+            }
+            if (step.isCompleted === input.isCompleted) {
+                return viewOn(current, input.effectiveDate);
+            }
+
+            const nextHistory =
+                input.isCompleted && transition?.status === 'todo'
+                    ? [
+                          ...history,
+                          {
+                              effectiveDate: input.effectiveDate,
+                              sequence: Math.max(...history.map((item) => item.sequence)) + 1,
+                              status: 'inProgress' as const,
+                          },
+                      ].sort(compareTransitions)
+                    : history;
+            const record = save(
+                {
+                    ...current,
+                    steps: current.steps.map((candidate) =>
+                        candidate.id === stepId
+                            ? { ...candidate, isCompleted: input.isCompleted }
+                            : candidate,
+                    ),
+                    version: nextVersion(current.version),
+                },
+                nextHistory,
+            );
+            return viewOn(record, input.effectiveDate);
+        },
+
+        async updateTask(taskId, rawInput, version, effectiveDate) {
             await wait(delayMs);
             if (rawInput.id !== taskId) {
                 throw new TaskApiError('VALIDATION_FAILED', 'The Task ID does not match.');
@@ -284,23 +400,35 @@ export function createMockTasksApi({
             assertValid(rawInput);
             const input = normalizeInput(rawInput);
             if (hasSameContent(current, input)) {
-                return viewOn(current, current.startDate);
+                return viewOn(current, effectiveDate);
             }
             const history = transitionsOf(taskId);
+            const stepsChanged = !hasSameSteps(current.steps, input.steps);
+            if (stepsChanged && resolveTransition(history, effectiveDate)?.status === 'completed') {
+                throw new TaskApiError(
+                    'INVALID_CALENDAR_OPERATION',
+                    'Steps cannot change when the Task is completed on this date.',
+                );
+            }
             if (input.startDate !== current.startDate && history.length > 1) {
                 throw new TaskApiError('VALIDATION_FAILED', 'The Task is not valid.', {
                     startDate: 'The start date cannot change after the status has moved.',
                 });
             }
             const record = save(
-                { ...current, ...input, version: nextVersion(current.version) },
+                {
+                    ...current,
+                    ...input,
+                    steps: copySteps(input.steps),
+                    version: nextVersion(current.version),
+                },
                 history.map((transition) =>
                     transition.sequence === 0
                         ? { ...transition, effectiveDate: input.startDate }
                         : transition,
                 ),
             );
-            return viewOn(record, record.startDate);
+            return viewOn(record, effectiveDate);
         },
     };
 }
@@ -312,6 +440,7 @@ export function createSampleTasks(today: LocalDate): TaskRecordView[] {
         title: string,
         details: string | null,
         startDate: LocalDate,
+        steps: TaskStep[] = [],
     ): TaskRecordView => ({
         convertedHabitId: null,
         details,
@@ -320,6 +449,7 @@ export function createSampleTasks(today: LocalDate): TaskRecordView[] {
         latestStatus: 'todo',
         latestStatusEffectiveDate: startDate,
         startDate,
+        steps,
         title,
         type: 'anytime',
         version: '1',
@@ -331,8 +461,26 @@ export function createSampleTasks(today: LocalDate): TaskRecordView[] {
             'Renew library card',
             'Bring proof of address.',
             addDays(today, -2),
+            [
+                {
+                    id: 'd9314952-e330-4eed-bba3-94dc4f951f11',
+                    text: 'Find proof of address',
+                    isCompleted: true,
+                },
+                {
+                    id: 'b86aa81e-d0d1-4d59-a6cb-f00d5fce8050',
+                    text: 'Visit the library',
+                    isCompleted: false,
+                },
+            ],
         ),
-        sample('0b9e8d7c-6a5f-4e3d-8c2b-1a0f9e8d7c6b', 'Plan weekend groceries', null, today),
+        sample('0b9e8d7c-6a5f-4e3d-8c2b-1a0f9e8d7c6b', 'Plan weekend groceries', null, today, [
+            {
+                id: '411bb024-a900-4f15-ad10-999f21dd98ca',
+                text: 'Check the pantry',
+                isCompleted: false,
+            },
+        ]),
         {
             ...sample(
                 '2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f',

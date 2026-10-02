@@ -11,7 +11,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:watch": "prettier --check .",
     "typecheck": "tsc -b --pretty false"
   },
   "dependencies": {
@@ -24,7 +23,8 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
     "i18next": "^26.4.2",
-    "i18next-resources-to-backend": "^1.2.3",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "i18next-http-backend": "^4.0.2",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

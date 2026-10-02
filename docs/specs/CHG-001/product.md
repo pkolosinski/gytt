@@ -16,7 +16,7 @@ GYTT establishes one trusted place for daily organization while preserving clear
 
 ## Current Behaviour (As-Is State)
 
-This is greenfield work. No GYTT application or existing task-and-habit capability exists yet.
+The web application has a mock-backed Tasks board and Anytime Task editor. The persisted Tasks and Habits capabilities, Tasks API contract, and feature server endpoints remain under implementation.
 
 ## Change Delta
 
@@ -38,26 +38,35 @@ Acceptance conditions:
 - The Tasks view is a three-column board containing To do, In progress, and Completed, presented as one joined table-like surface with a shared header row and divided task rows.
 - The Tasks board loads standard Tasks and due daily or selected-day Habit occurrences through one composite request; the whole board fails visibly if either capability query fails.
 - Standard Tasks and Habit occurrences share the same board columns but may use visually distinct cards.
-- All standard Task cards on the board have the same compact height; titles are visually larger than descriptions, and long content is clamped to fit.
+- Standard Task cards have a compact base height with slightly increased padding; cards with Steps grow to show the full checklist. A divider separates Steps from the Task content, and carried-forward date text appears at the bottom of the card after Steps. Titles are visually larger than descriptions, and long title and description content is clamped to fit. The whole card opens and can be dragged from any area except its Step checkboxes.
 - An empty Tasks board retains its three column headers and renders no explanatory placeholder.
 - Every Tasks column ends with a create action that starts a new task in that column's status; the page header also offers a create action that defaults to To do.
-- The create-task modal is titled "Create new task" and asks only for a title and optional description; its status comes from the action that opened it.
+- The create-task modal is titled "Create new task" and asks for a required title marked with an asterisk, an optional description, and optional Steps without displaying "(optional)" labels; its status comes from the action that opened it.
 - On phone widths, the three Tasks columns remain side by side in a horizontally scrollable board region.
-- The user can create an anytime task with a title and optional description; its start day is assigned automatically to the current device-local date.
-- The user can edit an anytime task's title and description without changing its start day.
+- The user can create an anytime task with a title, optional description, and optional Steps; its start day is assigned automatically to the current device-local date.
+- The user can edit an anytime task's title, description, and Steps without changing its start day.
 - An anytime task's start day is assigned automatically to the current device-local date and is not exposed in create or edit forms.
 - An anytime task defaults to To do, may instead be created directly in In progress or Completed, and appears on every active date from its start day.
-- A standard task can move between To do, In progress, and Completed in any direction using mouse drag-and-drop or the status menu in Task details. Board cards do not display a status control; keyboard and touch users open Task details to change status.
+- A standard task can move between To do, In progress, and Completed in any direction using mouse drag-and-drop or the status menu in Task details. Moving a Task directly to Completed does not ask for confirmation and checks all open Steps. Board cards do not display a status control; keyboard and touch users open Task details to change status.
 - Standard task status transitions are effective-dated so earlier boards retain the state that applied on their date.
+- A standard Task can have zero or more Steps. Each Step is a short text description of at most 200 Unicode code points and a checked or unchecked state; users cannot reorder Steps.
+- Steps are available on Anytime and Fixed-day Tasks, not on Habit occurrences. Steps are checklist entries, not independent child Tasks.
+- The user can add, edit, and remove Step text while creating or editing a standard Task.
+- The user can check or uncheck Steps from a standard Task's board card or details when the Task's effective status on the displayed date is not Completed.
+- Checking a Step on a Task that is To do on the displayed date moves the Task to In progress effective on that date.
+- Checking the final open Step opens a simple confirmation titled "Move task [title] to Completed" with "Yes" and "No" buttons. "Yes" moves the Task to Completed; "No" leaves the Step checked and the Task in its current status.
+- A Task created directly in Completed starts with all Steps checked.
+- Steps are read-only on dates where the Task's effective status is Completed. Moving the Task away from Completed preserves Step states and enables editing on dates where its effective status is not Completed.
+- Step checked state is shared across dates. A change made from a historical date where the Task is not Completed is visible on every date, including dates where the Task is Completed.
 - Completing an anytime task places it in Completed on that date and removes it from later boards unless a later transition reopens it.
 - Backdating an anytime task's completion before an existing completion warns that later status logs will be removed and requires confirmation before removing them.
-- The user can create and edit a fixed-day task with a title, optional details, and a scheduled day.
+- The user can create and edit a fixed-day task with a title, optional details, a scheduled day, and optional Steps.
 - A fixed-day task appears in the Tasks view only on its scheduled day.
 - A Fixed-day Task does not appear on later days and does not create an overdue alert regardless of its status.
 - A Fixed-day Task's details and status remain editable in its scheduled day's history.
 - The user can manually copy a non-completed Fixed-day Task to create another Task.
 - There is no separate task inbox or backlog.
-- Selecting any Tasks-board card opens one modal. A standard Task's details show its title, a description only when present, and an interactive status control for the selected date at the left of the action row, with Edit and Delete grouped on the right. Delete opens a named confirmation. The details and edit views do not show its Task type or start date. The modal supports create/edit, copy, conversion, and deletion actions.
+- Selecting any Tasks-board card opens one modal. A standard Task's details show its title, a description only when present, its Steps when present, and an interactive status control for the selected date at the left of the action row, with Edit and Delete grouped on the right. Step checkboxes are interactive unless the Task is Completed on the displayed date. Delete opens a named confirmation. The details and edit views do not show its Task type or start date. The modal supports create/edit, copy, conversion, and deletion actions.
 - A Habit-task modal shows simple occurrence details and links to the corresponding Habits period view.
 - Habit-task progress is editable inline on its Tasks-board card.
 - Completed standard Tasks remain visible in the board's Completed column for the viewed date.
@@ -115,5 +124,5 @@ Acceptance conditions:
 - External service integrations.
 - Reminders and notifications.
 - Timers or custom habit progress controls beyond binary and numeric entry.
-- Task priorities, deadlines, time-of-day scheduling, recurrence, tags, categories, subtasks, attachments, projects, or a backlog.
+- Task priorities, deadlines, time-of-day scheduling, recurrence, tags, categories, independent child Tasks or nested Task hierarchies, Step scheduling, Step reordering, attachments, projects, or a backlog.
 - Calendar replacement, general notes or knowledge management, project management, health tracking, file storage, or general AI coaching.

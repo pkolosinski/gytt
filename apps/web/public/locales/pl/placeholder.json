@@ -1,0 +1,8 @@
+{
+  "badge": "Wersja robocza",
+  "cardTitle": "Przestrzeń robocza już wkrótce",
+  "cardDescription": "Ścieżka jest podłączona i gotowa na kolejny etap wdrożenia.",
+  "ready": "Nawigacja modułu {{module}} jest gotowa.",
+  "notIncluded": "Logika domenowa i zapisane dane nie są częścią tej wersji roboczej.",
+  "backToDashboard": "Wróć do pulpitu"
+}

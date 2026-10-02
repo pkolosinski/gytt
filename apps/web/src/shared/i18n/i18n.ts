@@ -1,47 +1,38 @@
-import i18next from 'i18next';
-import resourcesToBackend from 'i18next-resources-to-backend';
-import { initReactI18next, useTranslation } from 'react-i18next';
+import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import HttpBackend from 'i18next-http-backend';
+import { initReactI18next } from 'react-i18next';
 
-import { DEFAULT_LANGUAGE, isLanguage, SUPPORTED_LANGUAGES, type Language } from './languages.ts';
-import type { Dictionary } from './locales/en.ts';
+export const LANGUAGES: Record<string, string> = {
+    en: 'English',
+    pl: 'Polski',
+} as const;
 
-// Each dictionary is a separate chunk, so only the active language is downloaded.
-const dictionaryLoaders: Record<Language, () => Promise<Dictionary>> = {
-    en: () => import('./locales/en.ts').then((module) => module.en),
-    pl: () => import('./locales/pl.ts').then((module) => module.pl),
-};
+export const NAMESPACES = [
+    'common',
+    'dashboard',
+    'habits',
+    'placeholder',
+    'sidebar',
+    'tasks',
+] as const;
 
-i18next.on('languageChanged', (language) => {
-    if (typeof document !== 'undefined') {
-        document.documentElement.lang = language;
-    }
+i18n.use(initReactI18next)
+    .use(HttpBackend)
+    .use(LanguageDetector)
+    .init({
+        supportedLngs: Object.keys(LANGUAGES),
+        interpolation: { escapeValue: false },
+        load: 'languageOnly',
+        ns: NAMESPACES,
+        defaultNS: 'common',
+        // backend: {
+        //     loadPath: '/locales/{{lng}}/{{ns}}.json',
+        // },
+    });
+
+i18n.on('languageChanged', (lng) => {
+    document.documentElement.lang = lng;
 });
 
-/** Loads only `language`'s dictionary and initializes the shared i18next instance. */
-export async function initI18n(language: Language): Promise<void> {
-    await i18next
-        .use(
-            resourcesToBackend((requested: string) =>
-                dictionaryLoaders[isLanguage(requested) ? requested : DEFAULT_LANGUAGE](),
-            ),
-        )
-        .use(initReactI18next)
-        .init({
-            // Every dictionary is complete, so no fallback language is loaded alongside the active one.
-            fallbackLng: false,
-            interpolation: { escapeValue: false },
-            lng: language,
-            load: 'currentOnly',
-            supportedLngs: SUPPORTED_LANGUAGES,
-        });
-}
-
-export function useLanguage() {
-    const { i18n } = useTranslation();
-    const language = isLanguage(i18n.resolvedLanguage) ? i18n.resolvedLanguage : DEFAULT_LANGUAGE;
-
-    return {
-        changeLanguage: (next: Language) => i18n.changeLanguage(next),
-        language,
-    };
-}
+export default i18n;

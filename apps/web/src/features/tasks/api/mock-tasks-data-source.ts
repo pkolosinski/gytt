@@ -8,6 +8,7 @@ import type {
     TaskBoardView,
     TaskInput,
     TaskRecordView,
+    TaskStep,
     TaskView,
 } from '../models/task.ts';
 import { TaskApiError, type TasksDataSource } from './tasks-data-source.ts';
@@ -27,6 +28,7 @@ function toTaskView(record: TaskRecordView): TaskView {
         details: record.details,
         id: record.id,
         startDate: record.startDate,
+        steps: record.steps.map((step) => ({ ...step })),
         status: record.latestStatus,
         statusEffectiveDate: record.latestStatusEffectiveDate,
         title: record.title,
@@ -41,6 +43,7 @@ function normalizeInput(input: TaskInput): TaskInput {
         details: details.length === 0 ? null : details,
         id: input.id,
         startDate: input.startDate,
+        steps: input.steps.map((step) => ({ ...step, text: step.text.trim() })),
         title: input.title.trim(),
         type: input.type,
     };
@@ -51,13 +54,32 @@ function assertValid(input: TaskInput): void {
         {
             details: input.details ?? '',
             startDate: input.startDate,
+            steps: input.steps,
             title: input.title,
         },
         t,
     );
+    if (input.steps.some((step) => step.text.trim().length === 0)) {
+        fields.steps = t('tasks.validation.stepRequired');
+    }
     if (Object.keys(fields).length > 0) {
         throw new TaskApiError('VALIDATION_FAILED', 'The Task is not valid.', fields);
     }
+}
+
+function hasSameSteps(left: readonly TaskStep[], right: readonly TaskStep[]): boolean {
+    return (
+        left.length === right.length &&
+        left.every((step, index) => {
+            const inputStep = right[index];
+            return (
+                inputStep !== undefined &&
+                step.id === inputStep.id &&
+                step.text === inputStep.text &&
+                step.isCompleted === inputStep.isCompleted
+            );
+        })
+    );
 }
 
 function hasSameContent(record: TaskRecordView, input: TaskInput): boolean {
@@ -65,7 +87,8 @@ function hasSameContent(record: TaskRecordView, input: TaskInput): boolean {
         record.type === input.type &&
         record.title === input.title &&
         record.details === input.details &&
-        record.startDate === input.startDate
+        record.startDate === input.startDate &&
+        hasSameSteps(record.steps, input.steps)
     );
 }
 
@@ -162,6 +185,7 @@ export function createSampleTasks(today: LocalDate): TaskRecordView[] {
         title: string,
         details: string | null,
         startDate: LocalDate,
+        steps: TaskStep[] = [],
     ): TaskRecordView => ({
         convertedHabitId: null,
         details,
@@ -170,6 +194,7 @@ export function createSampleTasks(today: LocalDate): TaskRecordView[] {
         latestStatus: 'todo',
         latestStatusEffectiveDate: startDate,
         startDate,
+        steps,
         title,
         type: 'anytime',
         version: '1',

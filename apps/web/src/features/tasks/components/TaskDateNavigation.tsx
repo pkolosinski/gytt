@@ -46,7 +46,7 @@ export function TaskDateNavigation({ onSelectDate, selectedDate, today }: TaskDa
                     )}
                     to={tasksPath(today)}
                 >
-                    {t('common.today')}
+                    {t('today')}
                 </Link>
                 <Link
                     aria-label={t('tasks.navigation.nextDay')}

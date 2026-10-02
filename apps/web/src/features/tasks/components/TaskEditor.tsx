@@ -1,5 +1,6 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
 
+import { Minus, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { StatusMessage } from '@/shared/components/StatusMessage.tsx';
@@ -12,6 +13,7 @@ import {
     validateTaskDraft,
     type TaskDraft,
     type TaskDraftField,
+    type TaskDraftStep,
     type TaskFieldErrors,
 } from '../helpers/task-draft.ts';
 import { useReloadTaskRecord, useSaveTask } from '../hooks/task-queries.ts';
@@ -29,17 +31,20 @@ interface TaskEditorProps {
     initial: TaskRecordView | null;
     onCancel: () => void;
     onSaved: (task: TaskView) => void;
+    selectedDate: LocalDate;
+    stepsEditable: boolean;
 }
 
 type EditorNotice =
     { type: 'conflict' } | { type: 'reloadFailed' } | { type: 'saveFailed'; detail: string };
 
-const DRAFT_FIELDS: readonly TaskDraftField[] = ['title', 'details'];
+const DRAFT_FIELDS: readonly TaskDraftField[] = ['title', 'details', 'steps'];
 
 function toDraft(record: TaskRecordView | null, defaultDate: LocalDate): TaskDraft {
     return {
         details: record?.details ?? '',
         startDate: record?.startDate ?? defaultDate,
+        steps: record?.steps.map((step) => ({ ...step })) ?? [],
         title: record?.title ?? '',
     };
 }
@@ -50,6 +55,10 @@ function toInput(taskId: string, draft: TaskDraft): TaskInput {
         details: details.length === 0 ? null : details,
         id: taskId,
         startDate: draft.startDate,
+        steps: draft.steps.flatMap((step) => {
+            const text = step.text.trim();
+            return text.length === 0 ? [] : [{ ...step, text }];
+        }),
         title: draft.title.trim(),
         type: 'anytime',
     };
@@ -73,6 +82,8 @@ export function TaskEditor({
     initial,
     onCancel,
     onSaved,
+    selectedDate,
+    stepsEditable,
 }: TaskEditorProps) {
     const { t } = useTranslation();
     const formId = useId();
@@ -88,9 +99,35 @@ export function TaskEditor({
     const fieldId = (field: TaskDraftField) => `${formId}-${field}`;
     const errorId = (field: TaskDraftField) => `${formId}-${field}-error`;
 
-    function updateDraft(field: TaskDraftField, value: string) {
+    function updateDraft(field: 'title' | 'details', value: string) {
         setDraft((current) => ({ ...current, [field]: value }));
         setFieldErrors((current) => ({ ...current, [field]: undefined }));
+    }
+
+    function updateStep(stepId: string, text: string) {
+        setDraft((current) => ({
+            ...current,
+            steps: current.steps.map((step) => (step.id === stepId ? { ...step, text } : step)),
+        }));
+        setFieldErrors((current) => ({ ...current, steps: undefined }));
+    }
+
+    function addStep() {
+        const step: TaskDraftStep = {
+            id: crypto.randomUUID(),
+            isCompleted: false,
+            text: '',
+        };
+        setDraft((current) => ({ ...current, steps: [...current.steps, step] }));
+        setFieldErrors((current) => ({ ...current, steps: undefined }));
+    }
+
+    function removeStep(stepId: string) {
+        setDraft((current) => ({
+            ...current,
+            steps: current.steps.filter((step) => step.id !== stepId),
+        }));
+        setFieldErrors((current) => ({ ...current, steps: undefined }));
     }
 
     function showFieldErrors(errors: TaskFieldErrors) {
@@ -128,7 +165,7 @@ export function TaskEditor({
             const saved = await saveTask.mutateAsync(
                 baseVersion === null
                     ? { initialStatus: defaultStatus, input, version: null }
-                    : { input, version: baseVersion },
+                    : { effectiveDate: selectedDate, input, version: baseVersion },
             );
             onSaved(saved);
         } catch (error) {
@@ -185,7 +222,10 @@ export function TaskEditor({
 
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-foreground" htmlFor={fieldId('title')}>
-                    {t('tasks.editor.title')}
+                    {t('tasks.editor.title')}{' '}
+                    <span aria-hidden="true" className="text-destructive">
+                        *
+                    </span>
                 </label>
                 <input
                     {...fieldProps('title')}
@@ -201,10 +241,7 @@ export function TaskEditor({
 
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-foreground" htmlFor={fieldId('details')}>
-                    {t('tasks.editor.description')}{' '}
-                    <span className="font-normal text-muted-foreground">
-                        {t('tasks.editor.optional')}
-                    </span>
+                    {t('tasks.editor.description')}
                 </label>
                 <textarea
                     {...fieldProps('details')}
@@ -215,6 +252,62 @@ export function TaskEditor({
                 />
                 {fieldError('details')}
             </div>
+
+            <fieldset className="flex flex-col gap-3 border-0 p-0" disabled={!stepsEditable}>
+                <legend className="mb-2 text-sm font-medium text-foreground">
+                    {t('tasks.steps.title')}
+                </legend>
+                {draft.steps.map((step, index) => {
+                    const stepFieldId = `${formId}-step-${step.id}`;
+                    const stepError = fieldErrors.steps;
+                    return (
+                        <div className="flex items-center gap-2" key={step.id}>
+                            <Button
+                                aria-label={t('tasks.steps.remove', { number: index + 1 })}
+                                onClick={() => removeStep(step.id)}
+                                size="icon-sm"
+                                type="button"
+                                variant="ghost"
+                            >
+                                <Minus aria-hidden="true" />
+                            </Button>
+                            <label className="sr-only" htmlFor={stepFieldId}>
+                                {t('tasks.steps.editorLabel', { number: index + 1 })}
+                            </label>
+                            <input
+                                aria-describedby={
+                                    stepError === undefined ? undefined : errorId('steps')
+                                }
+                                aria-invalid={stepError === undefined ? undefined : true}
+                                className={formControlClassName}
+                                id={stepFieldId}
+                                onChange={(event) => updateStep(step.id, event.target.value)}
+                                ref={(element) => {
+                                    if (index === 0) {
+                                        fieldRefs.current.steps = element;
+                                    }
+                                }}
+                                type="text"
+                                value={step.text}
+                            />
+                        </div>
+                    );
+                })}
+                {fieldError('steps')}
+                {!stepsEditable && (
+                    <p className="m-0 text-sm text-muted-foreground">{t('tasks.steps.readOnly')}</p>
+                )}
+                <Button
+                    aria-label={t('tasks.steps.add')}
+                    className="self-start"
+                    onClick={addStep}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                >
+                    <Plus aria-hidden="true" />
+                </Button>
+            </fieldset>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button onClick={onCancel} type="button" variant="outline">

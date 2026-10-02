@@ -36,6 +36,67 @@ const sections: SectionLink[] = [
     { end: false, icon: Repeat2, id: 'habits', matchPath: '/habits', to: '/habits/day' },
 ];
 
+export function AppSidebar() {
+    const { t } = useTranslation(['sidebar']);
+    const { isMobile, setOpen, state, toggleSidebar } = useSidebar();
+    const expandedOnHover = useRef(false);
+
+    function handleMouseEnter(event: ReactMouseEvent<HTMLDivElement>) {
+        const enteredEdgeTrigger =
+            event.target instanceof Element &&
+            event.target.closest('[data-sidebar="edge-trigger"]') !== null;
+
+        if (isMobile || state !== 'collapsed' || enteredEdgeTrigger) return;
+
+        expandedOnHover.current = true;
+        setOpen(true);
+    }
+
+    function handleMouseLeave() {
+        if (!expandedOnHover.current) return;
+
+        expandedOnHover.current = false;
+        setOpen(false);
+    }
+
+    function handleToggle() {
+        expandedOnHover.current = false;
+        toggleSidebar();
+    }
+
+    return (
+        <Sidebar collapsible="icon" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            <SidebarEdgeTrigger onToggle={handleToggle} />
+            <SidebarHeader className="flex-row items-center group-data-[collapsible=icon]:flex-col">
+                <SidebarLogo />
+            </SidebarHeader>
+            <SidebarContent>
+                <nav aria-label={t('menu')}>
+                    <SidebarGroup>
+                        <SidebarGroupLabel>{t('menu')}</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {sections.map((section) => (
+                                    <SectionNavItem key={section.to} section={section} />
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                </nav>
+                <SidebarGroup className="mt-auto">
+                    <SidebarGroupLabel>{t('preferences')}</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <ThemeMenuItem />
+                            <LanguageMenuItem />
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+        </Sidebar>
+    );
+}
+
 interface SectionNavItemProps {
     section: SectionLink;
 }
@@ -110,66 +171,5 @@ function SidebarEdgeTrigger({ onToggle }: { onToggle: () => void }) {
         >
             {isExpanded ? <ChevronLeft aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
         </Button>
-    );
-}
-
-export function AppSidebar() {
-    const { t } = useTranslation();
-    const { isMobile, setOpen, state, toggleSidebar } = useSidebar();
-    const expandedOnHover = useRef(false);
-
-    function handleMouseEnter(event: ReactMouseEvent<HTMLDivElement>) {
-        const enteredEdgeTrigger =
-            event.target instanceof Element &&
-            event.target.closest('[data-sidebar="edge-trigger"]') !== null;
-
-        if (isMobile || state !== 'collapsed' || enteredEdgeTrigger) return;
-
-        expandedOnHover.current = true;
-        setOpen(true);
-    }
-
-    function handleMouseLeave() {
-        if (!expandedOnHover.current) return;
-
-        expandedOnHover.current = false;
-        setOpen(false);
-    }
-
-    function handleToggle() {
-        expandedOnHover.current = false;
-        toggleSidebar();
-    }
-
-    return (
-        <Sidebar collapsible="icon" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <SidebarEdgeTrigger onToggle={handleToggle} />
-            <SidebarHeader className="flex-row items-center group-data-[collapsible=icon]:flex-col">
-                <SidebarLogo />
-            </SidebarHeader>
-            <SidebarContent>
-                <nav aria-label={t('app.menu')}>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>{t('app.menu')}</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {sections.map((section) => (
-                                    <SectionNavItem key={section.to} section={section} />
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </nav>
-                <SidebarGroup className="mt-auto">
-                    <SidebarGroupLabel>{t('app.preferences')}</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <ThemeMenuItem />
-                            <LanguageMenuItem />
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-        </Sidebar>
     );
 }

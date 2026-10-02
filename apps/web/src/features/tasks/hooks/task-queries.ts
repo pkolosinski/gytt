@@ -18,7 +18,7 @@ export function useTaskRecord(taskId: string) {
 /** A `null` version creates the Task in `initialStatus`; a version updates it. */
 export type SaveTaskVariables =
     | { input: TaskInput; initialStatus: TaskStatus; version: null }
-    | { input: TaskInput; version: string };
+    | { effectiveDate: LocalDate; input: TaskInput; version: string };
 
 /** Creates or updates a Task and refreshes every board and the saved record. */
 export function useSaveTask() {
@@ -28,8 +28,43 @@ export function useSaveTask() {
         mutationFn: (variables: SaveTaskVariables): Promise<TaskView> =>
             variables.version === null
                 ? tasksApi.createTask(variables.input, variables.initialStatus)
-                : tasksApi.updateTask(variables.input.id, variables.input, variables.version),
+                : tasksApi.updateTask(
+                      variables.input.id,
+                      variables.input,
+                      variables.version,
+                      variables.effectiveDate,
+                  ),
         onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
+        },
+    });
+}
+
+export type ToggleTaskStepVariables = {
+    date: LocalDate;
+    isCompleted: boolean;
+    stepId: string;
+    task: TaskView;
+};
+
+/** Changes one shared Step and refreshes every date view and the saved record. */
+export function useToggleTaskStep() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            date,
+            isCompleted,
+            stepId,
+            task,
+        }: ToggleTaskStepVariables): Promise<TaskView> =>
+            tasksApi.toggleStep(task.id, stepId, {
+                effectiveDate: date,
+                isCompleted,
+                version: task.version,
+            }),
+        mutationKey: taskQueryKeys.toggleStep,
+        onSettled: async () => {
             await queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
         },
     });
@@ -74,14 +109,16 @@ export function useMoveTask() {
             await queryClient.cancelQueries({ queryKey });
             const previous = queryClient.getQueryData(taskQueries.board(date).queryKey);
             if (previous !== undefined) {
-                queryClient.setQueryData(
-                    queryKey,
-                    moveBoardItem(previous, {
-                        ...task,
-                        status,
-                        statusEffectiveDate: date,
-                    }),
-                );
+                const movedTask: TaskView = {
+                    ...task,
+                    status,
+                    statusEffectiveDate: date,
+                    steps:
+                        status === 'completed'
+                            ? task.steps.map((step) => ({ ...step, isCompleted: true }))
+                            : task.steps,
+                };
+                queryClient.setQueryData(queryKey, moveBoardItem(previous, movedTask));
             }
             return { previous };
         },

@@ -5,11 +5,6 @@
   "collapseSidebar": "Zwiń panel boczny",
   "expandSidebar": "Rozwiń panel boczny",
   "preferences": "Preferencje",
-  "darkTheme": "Ciemny motyw",
-  "language": "Język",
-  "sections": {
-    "dashboard": "Pulpit",
-    "tasks": "Zadania",
-    "habits": "Nawyki"
-  }
+  "theme": "Motyw",
+  "language": "Język"
 }

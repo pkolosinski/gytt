@@ -5,11 +5,11 @@ import { defineConfig } from 'vitest/config';
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
-    resolve: {
-        tsconfigPaths: true,
-    },
-    test: {
-        setupFiles: ['./src/test/setup.ts'],
-    },
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  test: {
+    setupFiles: ['./src/test/setup.ts'],
+  },
 });

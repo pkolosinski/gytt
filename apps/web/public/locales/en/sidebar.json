@@ -5,11 +5,6 @@
   "collapseSidebar": "Collapse sidebar",
   "expandSidebar": "Expand sidebar",
   "preferences": "Preferences",
-  "darkTheme": "Dark theme",
-  "language": "Language",
-  "sections": {
-    "dashboard": "Dashboard",
-    "tasks": "Tasks",
-    "habits": "Habits"
-  }
+  "theme": "Theme",
+  "language": "Language"
 }

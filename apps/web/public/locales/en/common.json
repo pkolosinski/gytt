@@ -7,5 +7,15 @@
   "open": "Open",
   "retry": "Retry",
   "retrying": "Retrying…",
-  "today": "Today"
+  "today": "Today",
+  "sections": {
+    "dashboard": "Dashboard",
+    "tasks": "Todo list",
+    "habits": "Habits"
+  },
+  "themes": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
 }

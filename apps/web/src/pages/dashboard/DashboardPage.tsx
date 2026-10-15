@@ -1,5 +1,5 @@
-import { DashboardContent } from '../../features/dashboard/components/DashboardContent.tsx';
+import { DashboardContent } from '@/features/dashboard';
 
 export function DashboardPage() {
-    return <DashboardContent />;
+  return <DashboardContent />;
 }

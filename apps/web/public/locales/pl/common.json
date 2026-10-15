@@ -7,5 +7,15 @@
   "open": "Otwórz",
   "retry": "Ponów",
   "retrying": "Ponawianie…",
-  "today": "Dzisiaj"
+  "today": "Dzisiaj",
+  "sections": {
+    "dashboard": "Dashboard",
+    "tasks": "Lista zadań",
+    "habits": "Nawyki"
+  },
+  "themes": {
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy"
+  }
 }

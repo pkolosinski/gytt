@@ -20,6 +20,7 @@ dependencies {
 
     testImplementation(libs.findLibrary("kotest-assertions-core").get())
     testImplementation(libs.findLibrary("kotest-runner").get())
+    testImplementation(libs.findLibrary("mockk-jvm").get())
 }
 
 tasks.withType<Test>().configureEach {

@@ -43,3 +43,6 @@ bin/
 
 ### pnpm ###
 .pnpm-store
+
+# Temporary, per-feature plans shared by sessions in this checkout
+.work/

@@ -49,18 +49,16 @@ function normalizeInput(input: TaskInput): TaskInput {
 }
 
 function assertValid(input: TaskInput): void {
-  const fields = validateTaskDraft(
-    {
-      details: input.details ?? '',
-      startDate: input.startDate,
-      steps: input.steps,
-      title: input.title,
-    },
-    t,
+    const fields = validateTaskDraft(
+        {
+            details: input.details ?? '',
+            startDate: input.startDate,
+            steps: input.steps,
+            title: input.title,
+        },
+        t,
+        { requireNonEmptySteps: true },
   );
-  if (input.steps.some((step) => step.text.trim().length === 0)) {
-    fields.steps = t('tasks.validation.stepRequired');
-  }
   if (Object.keys(fields).length > 0) {
     throw new TaskApiError('VALIDATION_FAILED', 'The Task is not valid.', fields);
   }

@@ -24,7 +24,6 @@ dependencies {
     implementation(libs.logback.classic)
 
     // test
-    testImplementation(libs.couchbase.java.client)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.testcontainers.couchbase)
 }

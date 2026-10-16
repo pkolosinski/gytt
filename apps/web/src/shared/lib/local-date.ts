@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** A device-independent calendar date in canonical `YYYY-MM-DD` form. */
 export type LocalDate = string;
 
@@ -24,20 +26,29 @@ const fromUtcDate = (date: Date): LocalDate => {
   return `${pad(date.getUTCFullYear(), 4)}-${pad(date.getUTCMonth() + 1, 2)}-${pad(date.getUTCDate(), 2)}`;
 };
 
+function isRealCalendarDate(value: string): boolean {
+    const match = LOCAL_DATE_PATTERN.exec(value);
+    if (match === null) {
+        return false;
+    }
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const date = toUtcDate(year, month, day);
+    return (
+        date.getUTCFullYear() === year &&
+        date.getUTCMonth() === month - 1 &&
+        date.getUTCDate() === day
+    );
+}
+
+export const localDateSchema = z.string().regex(LOCAL_DATE_PATTERN).refine(isRealCalendarDate);
+
 /** Returns the value when it is an exact, real calendar date; otherwise `null`. */
-export const parseLocalDate = (value: string): LocalDate | null => {
-  const match = LOCAL_DATE_PATTERN.exec(value);
-  if (match === null) {
-    return null;
-  }
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const date = toUtcDate(year, month, day);
-  const isExact =
-    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
-  return isExact ? value : null;
-};
+export function parseLocalDate(value: string): LocalDate | null {
+    const result = localDateSchema.safeParse(value);
+    return result.success ? result.data : null;
+}
 
 const toUtcDateFromLocalDate = (date: LocalDate): Date => {
   const [year, month, day] = date.split('-').map(Number);

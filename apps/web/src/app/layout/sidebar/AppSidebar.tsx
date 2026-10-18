@@ -13,7 +13,7 @@ import { UserPreferencesMenu } from './UserPreferencesMenu.tsx';
 export function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="pt-4">
+      <SidebarHeader className="pt-2">
         <SidebarLogo />
       </SidebarHeader>
       <SidebarContent>

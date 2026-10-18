@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 
-import { LayoutDashboard, ListChecks, Repeat2, type LucideIcon } from 'lucide-react';
+import { LayoutDashboard, ListTodo, Repeat2, type LucideIcon } from 'lucide-react';
 
 import {
   SidebarGroup,
@@ -14,7 +14,7 @@ import {
 
 const sections = [
   { id: 'dashboard', icon: LayoutDashboard, link: '/' },
-  { id: 'tasks', icon: ListChecks, link: '/tasks' },
+  { id: 'tasks', icon: ListTodo, link: '/tasks' },
   { id: 'habits', icon: Repeat2, link: '/habits/day' },
 ];
 
@@ -42,7 +42,7 @@ export function SectionsMenu() {
   );
 }
 
-interface SectionNavItemProps {
+type SectionNavItemProps = {
   Icon: LucideIcon;
   id: string;
   link: string;

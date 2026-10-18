@@ -9,7 +9,6 @@ export { TaskDateNavigation } from './components/TaskDateNavigation.tsx';
 export { TaskDateNotFound } from './components/TaskDateNotFound.tsx';
 export { TaskModal, type TaskModalState } from './components/TaskModal.tsx';
 export { TasksDataSourceProvider } from './components/TasksDataSourceProvider.tsx';
-export { tasksPath } from './helpers/task-routes.ts';
 export { useTaskMoves } from './hooks/task-moves.ts';
 export { useTaskBoard, useToggleTaskStep } from './hooks/task-queries.ts';
 export type { TaskRecordView, TaskStep, TaskView } from './models/task.ts';

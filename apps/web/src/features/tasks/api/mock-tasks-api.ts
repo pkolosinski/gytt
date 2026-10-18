@@ -125,15 +125,15 @@ function normalizeInput(input: TaskInput): TaskInput {
 }
 
 function assertValid(input: TaskInput): void {
-    const fields = validateTaskDraft(
-        {
-            details: input.details ?? '',
-            startDate: input.startDate,
-            steps: input.steps,
-            title: input.title,
-        },
-        t,
-        { requireNonEmptySteps: true },
+  const fields = validateTaskDraft(
+    {
+      details: input.details ?? '',
+      startDate: input.startDate,
+      steps: input.steps,
+      title: input.title,
+    },
+    t,
+    { requireNonEmptySteps: true },
   );
   if (Object.keys(fields).length > 0) {
     throw new TaskApiError('VALIDATION_FAILED', 'The Task is not valid.', fields);

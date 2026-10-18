@@ -27,27 +27,25 @@ const fromUtcDate = (date: Date): LocalDate => {
 };
 
 function isRealCalendarDate(value: string): boolean {
-    const match = LOCAL_DATE_PATTERN.exec(value);
-    if (match === null) {
-        return false;
-    }
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    const date = toUtcDate(year, month, day);
-    return (
-        date.getUTCFullYear() === year &&
-        date.getUTCMonth() === month - 1 &&
-        date.getUTCDate() === day
-    );
+  const match = LOCAL_DATE_PATTERN.exec(value);
+  if (match === null) {
+    return false;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = toUtcDate(year, month, day);
+  return (
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+  );
 }
 
 export const localDateSchema = z.string().regex(LOCAL_DATE_PATTERN).refine(isRealCalendarDate);
 
 /** Returns the value when it is an exact, real calendar date; otherwise `null`. */
 export function parseLocalDate(value: string): LocalDate | null {
-    const result = localDateSchema.safeParse(value);
-    return result.success ? result.data : null;
+  const result = localDateSchema.safeParse(value);
+  return result.success ? result.data : null;
 }
 
 const toUtcDateFromLocalDate = (date: LocalDate): Date => {

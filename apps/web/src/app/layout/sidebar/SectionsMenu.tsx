@@ -51,7 +51,7 @@ interface SectionNavItemProps {
 function SectionNavItem({ Icon, id, link }: SectionNavItemProps) {
   const { t } = useTranslation(['common', 'sidebar']);
   const title = t(`sections.${id}`);
-  
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton render={<NavLink to={link} />} tooltip={title}>

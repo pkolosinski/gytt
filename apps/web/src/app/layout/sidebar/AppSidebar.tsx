@@ -13,7 +13,7 @@ import { UserPreferencesMenu } from './UserPreferencesMenu.tsx';
 export function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="pt-4">
         <SidebarLogo />
       </SidebarHeader>
       <SidebarContent>
@@ -28,7 +28,7 @@ export function AppSidebar() {
 
 function SidebarLogo() {
   const { open } = useSidebar();
-  
+
   return (
     <Link to="/" className="flex items-center gap-2">
       {/* Placeholder until the GYTT logo asset exists. */}

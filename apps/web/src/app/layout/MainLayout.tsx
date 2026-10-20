@@ -7,7 +7,7 @@ import { SidebarProvider } from '@/shared/generated/shadcn/ui/sidebar.tsx';
 import { AppSidebar } from './sidebar/AppSidebar.tsx';
 
 export function MainLayout() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const { pathname } = useLocation();
 
   const pathnameToSection = (pathname: string): string => {
@@ -29,7 +29,7 @@ export function MainLayout() {
           <Separator orientation="vertical" />
           <span>{pathnameToSection(pathname)}</span>
         </header>
-        <div className="p-6">
+        <div className="flex min-h-0 flex-1 flex-col p-6">
           <Outlet />
         </div>
       </main>

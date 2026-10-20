@@ -20,26 +20,24 @@ const modules = [
 ] as const;
 
 export function DashboardContent() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dashboard', 'common']);
 
   return (
     <div className="flex flex-1 flex-col gap-10 sm:gap-14">
       <header className="max-w-3xl space-y-5">
         <p className="text-sm font-medium tracking-[0.12em] text-primary uppercase">
-          {t('dashboard.eyebrow')}
+          {t('eyebrow')}
         </p>
         <div className="space-y-3">
           <h1 className="font-heading m-0 text-4xl tracking-tight text-foreground sm:text-6xl">
-            {t('dashboard.title')}
+            {t('title')}
           </h1>
-          <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-            {t('dashboard.subtitle')}
-          </p>
+          <p className="max-w-2xl text-lg leading-8 text-muted-foreground">{t('subtitle')}</p>
         </div>
       </header>
 
       <nav
-        aria-label={t('dashboard.modulesLabel')}
+        aria-label={t('modulesLabel')}
         className="grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2"
       >
         {modules.map(({ href, icon: Icon, id }) => (
@@ -52,20 +50,18 @@ export function DashboardContent() {
                 <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon aria-hidden="true" />
                 </div>
-                <Badge variant="secondary">{t('dashboard.today')}</Badge>
+                <Badge variant="secondary">{t('today')}</Badge>
               </div>
-              <CardTitle className="mt-4">{t(`dashboard.modules.${id}.title`)}</CardTitle>
-              <CardDescription>{t(`dashboard.modules.${id}.description`)}</CardDescription>
+              <CardTitle className="mt-4">{t(`modules.${id}.title`)}</CardTitle>
+              <CardDescription>{t(`modules.${id}.description`)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1">
-              <p className="text-sm text-muted-foreground">{t(`dashboard.modules.${id}.prompt`)}</p>
+              <p className="text-sm text-muted-foreground">{t(`modules.${id}.prompt`)}</p>
             </CardContent>
             <CardFooter className="justify-between gap-4">
-              <span className="text-sm text-muted-foreground">
-                {t(`dashboard.modules.${id}.openLabel`)}
-              </span>
+              <span className="text-sm text-muted-foreground">{t(`modules.${id}.openLabel`)}</span>
               <Button nativeButton={false} render={<Link to={href} />} size="sm" variant="outline">
-                {t('common.open')}
+                {t('common:open')}
                 <ArrowRight aria-hidden="true" data-icon="inline-end" />
               </Button>
             </CardFooter>

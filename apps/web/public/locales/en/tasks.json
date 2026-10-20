@@ -47,6 +47,8 @@
   "steps": {
     "title": "Steps",
     "listLabel": "Steps",
+    "completedStatus": "Completed",
+    "incompleteStatus": "Not completed",
     "add": "Add a step",
     "editorLabel": "Step {{number}}",
     "remove": "Remove step {{number}}",

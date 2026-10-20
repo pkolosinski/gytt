@@ -46,10 +46,10 @@ type SectionNavItemProps = {
   Icon: LucideIcon;
   id: string;
   link: string;
-}
+};
 
 function SectionNavItem({ Icon, id, link }: SectionNavItemProps) {
-  const { t } = useTranslation(['common', 'sidebar']);
+  const { t } = useTranslation('common');
   const title = t(`sections.${id}`);
 
   return (

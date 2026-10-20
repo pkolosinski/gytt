@@ -1,66 +1,34 @@
 import { useTranslation } from 'react-i18next';
 
-import { useDroppable } from '@dnd-kit/core';
-import { cn } from 'cn';
-import { Plus } from 'lucide-react';
-
 import { Badge } from '@/shared/generated/shadcn/ui/badge.tsx';
-import { Button } from '@/shared/generated/shadcn/ui/button.tsx';
 import { Skeleton } from '@/shared/generated/shadcn/ui/skeleton.tsx';
 import type { LocalDate } from '@/shared/lib/local-date.ts';
-import type { TaskBoardItem, TaskStatus, TaskView } from '../models/task.ts';
+import type { TaskListItem, TaskStatus } from '../models/task.ts';
 import { StandardTaskCard, taskCardClassName } from './StandardTaskCard.tsx';
 import { TaskStatusIcon } from './TaskStatusIcon.tsx';
 
 const LOADING_CARDS = 2;
 
 interface TaskColumnProps {
-  /** The Task being dragged, if any; columns other than its own accept the drop. */
-  draggedTask: TaskView | null;
-  isStepPending: boolean;
-  items: readonly TaskBoardItem[] | null;
-  onCreateTask: (status: TaskStatus) => void;
-  onOpenTask: (task: TaskView) => void;
-  onToggleStep: (task: TaskView, stepId: string, isCompleted: boolean) => Promise<TaskView | null>;
-  pendingTaskIds: ReadonlySet<string>;
+  items: readonly TaskListItem[] | null;
   selectedDate: LocalDate;
   status: TaskStatus;
 }
 
 /**
- * One status column of the board: a pinned header cell above a drop zone of Task
- * cards followed by a create action. The heading and create action stay when
- * there are no cards.
+ * One status column of the read-only board, with a pinned header and task cards.
  */
-export function TaskColumn({
-  draggedTask,
-  isStepPending,
-  items,
-  onCreateTask,
-  onOpenTask,
-  onToggleStep,
-  pendingTaskIds,
-  selectedDate,
-  status,
-}: TaskColumnProps) {
-  const { t } = useTranslation();
+export function TaskColumn({ items, selectedDate, status }: TaskColumnProps) {
+  const { t } = useTranslation('tasks');
   const headingId = `task-column-${status}`;
-  const label = t(`tasks.status.${status}`);
-  const { isOver, setNodeRef } = useDroppable({ id: status });
-  const acceptsDrop = draggedTask !== null && draggedTask.status !== status;
+  const label = t(`status.${status}`);
 
   return (
     <section
       aria-labelledby={headingId}
-      className={cn(
-        'flex min-w-0 snap-start flex-col transition-colors',
-        acceptsDrop && 'bg-primary/5',
-        acceptsDrop && isOver && 'bg-primary/10 ring-2 ring-primary/40 ring-inset',
-      )}
+      className="flex min-h-full min-w-0 snap-start flex-col"
       data-status={status}
-      ref={setNodeRef}
     >
-      {/* Opaque replica of the board surface so cards scroll beneath the pinned header. */}
       <div className="sticky top-0 z-10 flex h-11 shrink-0 items-center gap-2 border-b bg-background bg-linear-to-r from-muted/50 to-muted/50 px-3">
         <TaskStatusIcon status={status} />
         <h2 className="m-0 truncate text-sm font-medium text-foreground" id={headingId}>
@@ -68,7 +36,7 @@ export function TaskColumn({
         </h2>
         {items !== null && (
           <Badge
-            aria-label={t('tasks.column.count', { count: items.length, status: label })}
+            aria-label={t('column.count', { count: items.length, status: label })}
             className="ml-auto"
             variant="secondary"
           >
@@ -91,28 +59,11 @@ export function TaskColumn({
         className="m-0 flex list-none flex-col gap-2 px-2 pt-2 empty:hidden"
       >
         {items?.map((item) => (
-          <li key={item.task.id}>
-            <StandardTaskCard
-              isPending={isStepPending || pendingTaskIds.has(item.task.id)}
-              onOpen={onOpenTask}
-              onToggleStep={onToggleStep}
-              selectedDate={selectedDate}
-              task={item.task}
-            />
+          <li key={item.id}>
+            <StandardTaskCard selectedDate={selectedDate} task={item} />
           </li>
         ))}
       </ul>
-      <div className="p-2">
-        <Button
-          aria-label={t('tasks.column.createIn', { status: label })}
-          className="w-full justify-start text-muted-foreground"
-          onClick={() => onCreateTask(status)}
-          variant="ghost"
-        >
-          <Plus aria-hidden="true" data-icon="inline-start" />
-          {t('tasks.column.create')}
-        </Button>
-      </div>
     </section>
   );
 }

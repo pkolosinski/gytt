@@ -1,35 +1,15 @@
 import { todayLocalDate, type LocalDate } from '@/shared/lib/local-date.ts';
-import type {
-  TaskBoardView,
-  TaskInput,
-  TaskMoveInput,
-  TaskRecordView,
-  TaskStatus,
-  TaskStepToggleInput,
-  TaskView,
-} from '../models/task.ts';
+import type { TaskListItem } from '../models/task.ts';
 import { createMockTasksApi, createSampleTasks } from './mock-tasks-api.ts';
 
 /** The Tasks operations used by the UI. */
 export type TasksApi = {
-  getBoard(date: LocalDate): Promise<TaskBoardView>;
-  getTask(taskId: string): Promise<TaskRecordView>;
-  createTask(input: TaskInput, initialStatus: TaskStatus): Promise<TaskView>;
-  updateTask(
-    taskId: string,
-    input: TaskInput,
-    version: string,
-    effectiveDate: LocalDate,
-  ): Promise<TaskView>;
-  moveTask(taskId: string, move: TaskMoveInput): Promise<TaskView>;
-  toggleStep(taskId: string, stepId: string, input: TaskStepToggleInput): Promise<TaskView>;
-  deleteTask(taskId: string, version: string): Promise<void>;
+  listTasks(date: LocalDate): Promise<TaskListItem[]>;
 };
 
 /**
- * The Tasks API imported directly by query options and hooks. It is backed by
- * in-memory sample data until the OpenAPI contract and generated client are
- * connected.
+ * The Tasks API used by the board. It is backed by in-memory sample data until
+ * the OpenAPI contract and generated client are connected.
  */
 export const tasksApi: TasksApi = createMockTasksApi({
   delayMs: 150,

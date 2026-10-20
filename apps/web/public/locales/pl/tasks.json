@@ -47,6 +47,8 @@
   "steps": {
     "title": "Kroki",
     "listLabel": "Kroki",
+    "completedStatus": "Ukończony",
+    "incompleteStatus": "Nieukończony",
     "add": "Dodaj krok",
     "editorLabel": "Krok {{number}}",
     "remove": "Usuń krok {{number}}",

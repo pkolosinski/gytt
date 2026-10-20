@@ -22,13 +22,13 @@ interface ModulePlaceholderProps {
 }
 
 export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlaceholderProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('placeholder');
 
   return (
     <div className="flex flex-1">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
         <header className="space-y-5">
-          <Badge variant="outline">{t('placeholder.badge')}</Badge>
+          <Badge variant="outline">{t('badge')}</Badge>
           <div className="space-y-3">
             <h1 className="font-heading m-0 text-4xl tracking-tight text-foreground sm:text-6xl">
               {title}
@@ -39,8 +39,8 @@ export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlac
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('placeholder.cardTitle')}</CardTitle>
-            <CardDescription>{t('placeholder.cardDescription')}</CardDescription>
+            <CardTitle>{t('cardTitle')}</CardTitle>
+            <CardDescription>{t('cardDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
@@ -48,17 +48,15 @@ export function ModulePlaceholder({ description, icon: Icon, title }: ModulePlac
                 <Icon aria-hidden="true" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-foreground">
-                  {t('placeholder.ready', { module: title })}
-                </p>
-                <p className="text-sm text-muted-foreground">{t('placeholder.notIncluded')}</p>
+                <p className="font-medium text-foreground">{t('ready', { module: title })}</p>
+                <p className="text-sm text-muted-foreground">{t('notIncluded')}</p>
               </div>
             </div>
           </CardContent>
           <CardFooter className="justify-end">
             <Button nativeButton={false} render={<Link to="/" />} variant="outline">
               <ArrowLeft aria-hidden="true" data-icon="inline-start" />
-              {t('placeholder.backToDashboard')}
+              {t('backToDashboard')}
             </Button>
           </CardFooter>
         </Card>

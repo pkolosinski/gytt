@@ -1,11 +1,13 @@
 import type { LocalDate } from '@/shared/lib/local-date.ts';
 
-export type TaskStatus = 'todo' | 'inProgress' | 'completed';
+export const TASK_STATUSES = ['todo', 'inProgress', 'completed'] as const;
 
-export const TASK_STATUSES: readonly TaskStatus[] = ['todo', 'inProgress', 'completed'];
+export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export type TaskBoardView = Record<TaskStatus, TaskListItem[]> & {
+export type TasksOnDate = {
   date: LocalDate;
+} & {
+  [status in TaskStatus]: TaskListItem[];
 };
 
 export type TaskListItem = {

@@ -1,16 +1,17 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { BrowserRouter } from 'react-router';
 
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ThemeProvider } from '@/shared/theme/ThemeProvider.tsx';
-import { queryClient } from './query-client.ts';
 
-type Props = {
+interface Props {
   children: ReactNode;
-};
+}
 
 export function AppProviders({ children }: Props) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

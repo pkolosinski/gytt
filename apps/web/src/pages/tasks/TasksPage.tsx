@@ -1,20 +1,33 @@
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import { TaskBoard, useTaskBoard } from '@/features/tasks/index.ts';
-import { formatLocalDateLong, parseLocalDate, todayLocalDate } from '@/shared/lib/local-date.ts';
+import { TaskBoard, TaskBoardLoading, useFetchTasksOnDate } from '@/features/tasks/index.ts';
+import { StatusMessage } from '@/shared/components/StatusMessage.tsx';
+import {
+  formatLocalDateLong,
+  parseLocalDate,
+  todayLocalDate,
+  type LocalDate,
+} from '@/shared/lib/local-date.ts';
 import { TasksTodayRedirect } from './TasksTodayRedirect';
 
 export function TasksPage() {
-  const { i18n, t } = useTranslation(['tasks', 'common']);
   const { date = todayLocalDate() } = useParams();
-
   const selectedDate = parseLocalDate(date);
-  if (selectedDate === null) {
+  
+  if (!selectedDate) {
     return <TasksTodayRedirect />;
   }
-  
-  const board = useTaskBoard(selectedDate);
+  return <TasksPageForDate selectedDate={selectedDate} />;
+}
+
+type TasksPageForDateProps = {
+  selectedDate: LocalDate;
+};
+
+function TasksPageForDate({ selectedDate }: TasksPageForDateProps) {
+  const { i18n, t } = useTranslation(['tasks', 'common']);
+  const { data, isError } = useFetchTasksOnDate(selectedDate);
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6">
@@ -25,7 +38,15 @@ export function TasksPage() {
         </p>
       </div>
 
-      <TaskBoard selectedDate={selectedDate} view={board.data ?? null} />
+      {data !== undefined ? (
+        <TaskBoard input={data} selectedDate={selectedDate} />
+      ) : isError ? (
+        <StatusMessage title={t('boardError.title')} tone="error">
+          {t('boardError.description')}
+        </StatusMessage>
+      ) : (
+        <TaskBoardLoading selectedDate={selectedDate} />
+      )}
     </div>
   );
 }

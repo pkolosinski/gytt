@@ -4,7 +4,7 @@ import { useParams } from 'react-router';
 import { TaskBoard, TaskBoardLoading, useFetchTasksOnDate } from '@/features/tasks/index.ts';
 import { StatusMessage } from '@/shared/components/StatusMessage.tsx';
 import {
-  formatLocalDateLong,
+  formatLocalDateFull,
   parseLocalDate,
   todayLocalDate,
   type LocalDate,
@@ -14,7 +14,7 @@ import { TasksTodayRedirect } from './TasksTodayRedirect';
 export function TasksPage() {
   const { date = todayLocalDate() } = useParams();
   const selectedDate = parseLocalDate(date);
-  
+
   if (!selectedDate) {
     return <TasksTodayRedirect />;
   }
@@ -34,7 +34,7 @@ function TasksPageForDate({ selectedDate }: TasksPageForDateProps) {
       <div className="flex flex-col gap-1">
         <h1 className="font-heading m-0 text-4xl tracking-tight text-foreground">{t('title')}</h1>
         <p className="text-muted-foreground">
-          <time dateTime={selectedDate}>{formatLocalDateLong(selectedDate, i18n.language)}</time>
+          <time dateTime={selectedDate}>{formatLocalDateFull(selectedDate, i18n.language)}</time>
         </p>
       </div>
 

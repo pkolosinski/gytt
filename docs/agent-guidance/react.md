@@ -1,10 +1,16 @@
 # React and TypeScript conventions
 
 - Keep TypeScript strict; do not weaken compiler options to get around type errors.
-- Prefer `type` aliases. Use `interface` when extension or declaration merging is useful.
+- Use `interface` for React component props and `type` for other type definitions.
+- Use function declarations for React components and arrow functions for everything else, including
+  custom Hooks and helpers.
 - Use named exports rather than default exports.
 - Keep component render logic focused. Extract components or custom Hooks when they clarify intent,
   enable meaningful reuse, or isolate stateful behavior; avoid extracting every small JSX fragment.
+- Keep file-private supporting components and helpers beside their caller. Move or export them for
+  a concrete consumer or a meaningful independent responsibility, not merely because they have a name.
+- Prepare view data in named feature-owned transformations outside JSX. Keep transport access separate
+  from presentation shaping, and let components consume the resulting model directly.
 - Keep state minimal: store values that change independently, and derive values from props/state
   during render rather than duplicating them in state.
 - Use Effects to synchronize with external systems. Handle interaction-driven work in event handlers,

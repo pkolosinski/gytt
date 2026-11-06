@@ -4,11 +4,7 @@ export const TASK_STATUSES = ['todo', 'inProgress', 'completed'] as const;
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export type TasksOnDate = {
-  date: LocalDate;
-} & {
-  [status in TaskStatus]: TaskListItem[];
-};
+export type TasksOnDate = { date: LocalDate } & Record<TaskStatus, TaskListItem[]>;
 
 export type TaskListItem = {
   id: string;

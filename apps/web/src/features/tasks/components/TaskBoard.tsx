@@ -2,29 +2,15 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { LocalDate } from '@/shared/lib/local-date.ts';
-import { TASK_STATUSES, type TasksOnDate } from '../models/task.ts';
+import { TASK_STATUSES, type TasksFromDate } from '../models/task.ts';
 import { TaskColumn } from './TaskColumn.tsx';
 
 type Props = {
-  input: TasksOnDate;
   selectedDate: LocalDate;
+  input: TasksFromDate;
 };
 
-type TaskBoardLoadingProps = {
-  selectedDate: LocalDate;
-};
-
-type TaskBoardFrameProps = {
-  busy: boolean;
-  children: ReactNode;
-};
-
-/**
- * The board is a read-only, bordered surface of three task columns. Its inner
- * region is the single scroll area for all columns, whose headers stay pinned;
- * on narrow screens it also scrolls horizontally, snapping by column.
- */
-export function TaskBoard({ input, selectedDate }: Props) {
+export function TaskBoard({ selectedDate, input }: Props) {
   return (
     <TaskBoardFrame busy={false}>
       {TASK_STATUSES.map((status) => (
@@ -38,6 +24,15 @@ export function TaskBoard({ input, selectedDate }: Props) {
     </TaskBoardFrame>
   );
 }
+
+type TaskBoardLoadingProps = {
+  selectedDate: LocalDate;
+};
+
+type TaskBoardFrameProps = {
+  busy: boolean;
+  children: ReactNode;
+};
 
 export function TaskBoardLoading({ selectedDate }: TaskBoardLoadingProps) {
   return (
@@ -62,7 +57,7 @@ function TaskBoardFrame({ busy, children }: TaskBoardFrameProps) {
         tabIndex={0}
       >
         {/* Grows to fill the board but never shrinks, so all columns share one scroll. */}
-        <div className="grid min-h-full shrink-0 grow auto-cols-[minmax(15rem,85%)] grid-flow-col divide-x lg:auto-cols-auto lg:grid-flow-row lg:grid-cols-3">
+        <div className="grid min-h-full w-full shrink-0 grow auto-cols-[100%] grid-flow-col divide-x lg:auto-cols-auto lg:grid-flow-row lg:grid-cols-3">
           {children}
         </div>
       </div>

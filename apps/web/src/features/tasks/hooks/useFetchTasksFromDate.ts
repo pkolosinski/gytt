@@ -6,22 +6,22 @@ import { tasksApi } from '../api/tasks-api.ts';
 import {
   TASK_STATUSES,
   type TaskListItem,
-  type TasksOnDate,
+  type TasksFromDate,
   type TaskStatus,
 } from '../models/task.ts';
 
-export function useFetchTasksOnDate(date: LocalDate) {
-  const { data, isLoading, isError, error } = useQuery({
+export function useFetchTasksFromDate(date: LocalDate) {
+  const { data, status, error } = useQuery({
     queryKey: ['listTasks', date],
     queryFn: async () => {
       const res = await tasksApi.listTasks(date);
-      return toTasksOnDate(date, res);
+      return toTasksFromDate(date, res);
     },
   });
-  return { data, isLoading, isError, error };
+  return { data, status, error };
 }
 
-const toTasksOnDate = (date: LocalDate, tasks: readonly TaskListItem[]): TasksOnDate => {
+const toTasksFromDate = (date: LocalDate, tasks: readonly TaskListItem[]): TasksFromDate => {
   const tasksByStatus = groupBy(tasks, 'status');
   const taskListsByStatus = Object.fromEntries(
     TASK_STATUSES.map((status): [TaskStatus, TaskListItem[]] => [

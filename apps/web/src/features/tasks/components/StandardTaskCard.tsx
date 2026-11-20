@@ -15,7 +15,6 @@ interface StandardTaskCardProps {
   task: TaskListItem;
 }
 
-/** A non-interactive card showing the Task's board information and Steps. */
 export function StandardTaskCard({ selectedDate, task }: StandardTaskCardProps) {
   return (
     <article className={taskCardClassName} data-task-id={task.id}>

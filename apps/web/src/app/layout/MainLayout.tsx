@@ -21,7 +21,7 @@ export function MainLayout() {
   };
 
   return (
-    <SidebarProvider className="p-2">
+    <SidebarProvider className="p-0 sm:p-2">
       <AppSidebar />
       <main className="flex min-h-svh flex-1 flex-col">
         <header className="flex items-center gap-3 border-b p-2">
@@ -29,7 +29,7 @@ export function MainLayout() {
           <Separator orientation="vertical" />
           <span>{pathnameToSection(pathname)}</span>
         </header>
-        <div className="flex min-h-0 flex-1 flex-col p-6">
+        <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-6">
           <Outlet />
         </div>
       </main>

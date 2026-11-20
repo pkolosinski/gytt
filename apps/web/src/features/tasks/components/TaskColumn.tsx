@@ -9,16 +9,16 @@ import { TaskStatusIcon } from './TaskStatusIcon.tsx';
 
 const LOADING_CARDS = 2;
 
-interface TaskColumnProps {
-  items: readonly TaskListItem[] | null;
+interface Props {
   selectedDate: LocalDate;
   status: TaskStatus;
+  items: readonly TaskListItem[] | null;
 }
 
 /**
  * One status column of the read-only board, with a pinned header and task cards.
  */
-export function TaskColumn({ items, selectedDate, status }: TaskColumnProps) {
+export function TaskColumn({ selectedDate, status, items }: Props) {
   const { t } = useTranslation('tasks');
   const headingId = `task-column-${status}`;
   const label = t(`status.${status}`);
@@ -26,7 +26,7 @@ export function TaskColumn({ items, selectedDate, status }: TaskColumnProps) {
   return (
     <section
       aria-labelledby={headingId}
-      className="flex min-h-full min-w-0 snap-start flex-col"
+      className="flex min-h-full min-w-0 snap-start snap-always flex-col"
       data-status={status}
     >
       <div className="sticky top-0 z-10 flex h-11 shrink-0 items-center gap-2 border-b bg-background bg-linear-to-r from-muted/50 to-muted/50 px-3">

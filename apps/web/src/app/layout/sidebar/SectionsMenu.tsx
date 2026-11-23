@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 
-import { LayoutDashboard, ListTodo, Repeat2, type LucideIcon } from 'lucide-react';
+import { CalendarDays, LayoutDashboard, ListTodo, Repeat2, type LucideIcon } from 'lucide-react';
 
 import {
   SidebarGroup,
@@ -14,6 +14,7 @@ import {
 
 const sections = [
   { id: 'dashboard', icon: LayoutDashboard, link: '/' },
+  { id: 'calendar', icon: CalendarDays, link: '/calendar' },
   { id: 'tasks', icon: ListTodo, link: '/tasks' },
   { id: 'habits', icon: Repeat2, link: '/habits/day' },
 ];

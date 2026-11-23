@@ -17,13 +17,16 @@ export function MainLayout() {
     if (pathname.startsWith('/tasks')) {
       return t('sections.tasks');
     }
+    if (pathname.startsWith('/calendar')) {
+      return t('sections.calendar');
+    }
     return t('sections.dashboard');
   };
 
   return (
-    <SidebarProvider className="p-2">
+    <SidebarProvider className="h-svh min-h-0 p-2">
       <AppSidebar />
-      <main className="flex min-h-svh flex-1 flex-col">
+      <main className="flex min-h-0 flex-1 flex-col overflow-auto">
         <header className="flex items-center gap-3 border-b p-2">
           <AnimatedSidebarTrigger />
           <Separator orientation="vertical" />

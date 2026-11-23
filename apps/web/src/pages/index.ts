@@ -1,3 +1,4 @@
+export { CalendarPage } from './calendar/CalendarPage.tsx';
 export { DashboardPage } from './dashboard/DashboardPage.tsx';
 export { HabitsPage } from './habits/HabitsPage';
 export { TasksPage } from './tasks/TasksPage';

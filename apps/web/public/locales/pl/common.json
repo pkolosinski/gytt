@@ -11,7 +11,8 @@
   "sections": {
     "dashboard": "Dashboard",
     "tasks": "Lista zadań",
-    "habits": "Nawyki"
+    "habits": "Nawyki",
+    "calendar": "Kalendarz"
   },
   "themes": {
     "light": "Jasny",

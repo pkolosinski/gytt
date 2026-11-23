@@ -1,42 +1,29 @@
 package dev.pkolosinski.gyst.core.tasks
 
+import java.time.Clock
 import java.time.LocalDate
-import java.util.UUID
 
-class InMemoryTaskStore : TaskStore {
-    private val tasks = linkedMapOf<UUID, Task>()
+class InMemoryTaskStore(private val clock: Clock) : TaskStore {
+    private val tasks = linkedMapOf<TaskId, Task>()
 
-    /** Runs before each replace/delete, to simulate a concurrent change. */
+    /** Runs before each replace, to simulate a concurrent change. */
     var beforeWrite: () -> Unit = {}
 
-    fun put(task: Task) {
-        tasks[task.id] = task
-    }
+    override suspend fun listActiveOrderedByCreatedAt(from: LocalDate, to: LocalDate): List<Task> =
+        tasks.values.filter {
+            LocalDate.ofInstant(it.createdAt, clock.zone) <= to &&
+                (it.details.completedOn == null || it.details.completedOn >= from)
+        }
+            .sortedBy { it.createdAt }
 
-    override suspend fun listCreatedOnOrBefore(date: LocalDate) = tasks.values.filter {
-        it.createdOn <=
-            date
-    }
-
-    override suspend fun find(id: UUID) = tasks[id]
+    override suspend fun findById(id: TaskId): Task? = tasks[id]
 
     override suspend fun insert(task: Task) {
         tasks[task.id] = task
     }
 
-    override suspend fun replace(task: Task, expectedRevision: Long): WriteResult {
+    override suspend fun replace(id: TaskId, task: Task) {
         beforeWrite()
-        val stored = tasks[task.id] ?: return WriteResult.Missing
-        if (stored.revision != expectedRevision) return WriteResult.Conflict
-        tasks[task.id] = task
-        return WriteResult.Written
-    }
-
-    override suspend fun delete(id: UUID, expectedRevision: Long): WriteResult {
-        beforeWrite()
-        val stored = tasks[id] ?: return WriteResult.Missing
-        if (stored.revision != expectedRevision) return WriteResult.Conflict
-        tasks.remove(id)
-        return WriteResult.Written
+        tasks[id] = task
     }
 }

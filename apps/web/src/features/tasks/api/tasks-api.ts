@@ -5,7 +5,7 @@ import type { NewTask, TaskListItem, TaskPatch } from '../models/task.ts';
 
 /** The Tasks operations used by the UI. */
 export type TasksApi = {
-  listTasks(date: LocalDate): Promise<TaskListItem[]>;
+  listTasks(from: LocalDate, to: LocalDate): Promise<TaskListItem[]>;
   createTask(task: NewTask): Promise<TaskListItem>;
   updateTask(id: string, revision: number, patch: TaskPatch): Promise<TaskListItem>;
   deleteTask(id: string, revision: number): Promise<void>;
@@ -32,8 +32,8 @@ const toApiPatch = (patch: TaskPatch): ApiTaskPatch => ({
 
 /** The Tasks API backed by the GYST server. */
 export const tasksApi: TasksApi = {
-  async listTasks(date) {
-    const res = await listTasks({ date });
+  async listTasks(from, to) {
+    const res = await listTasks({ from, to });
     if (res.status !== 200) {
       throw new TasksApiError(res.status, res.data);
     }

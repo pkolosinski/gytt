@@ -1,10 +1,11 @@
 package dev.pkolosinski.gyst.server.tasks
 
 import dev.pkolosinski.gyst.core.tasks.Task
+import dev.pkolosinski.gyst.core.tasks.TaskId
 import dev.pkolosinski.gyst.core.tasks.TaskStore
 import dev.pkolosinski.gyst.core.tasks.TaskStoreUnavailableException
-import dev.pkolosinski.gyst.core.tasks.Tasks
 import dev.pkolosinski.gyst.core.tasks.WriteResult
+import dev.pkolosinski.gyst.core.tasks.taskFacade
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
@@ -29,23 +30,28 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
+import java.time.ZoneOffset
 
 private class MemoryStore : TaskStore {
-    val tasks = linkedMapOf<UUID, Task>()
+    val tasks = linkedMapOf<TaskId, Task>()
     var unavailable = false
 
     private fun check() {
         if (unavailable) throw TaskStoreUnavailableException(RuntimeException("down"))
     }
 
-    override suspend fun listCreatedOnOrBefore(date: LocalDate): List<Task> {
+    override suspend fun listActiveOrderedByCreatedAt(from: LocalDate, to: LocalDate): List<Task> {
         check()
-        return tasks.values.filter { it.createdOn <= date }
+        return tasks.values.filter {
+            val completedOn = it.completedOn
+            it.startedOn <= to && (completedOn == null || completedOn >= from)
+        }
     }
 
-    override suspend fun find(id: UUID): Task? {
+    override suspend fun find(id: TaskId): Task? {
         check()
         return tasks[id]
     }
@@ -58,15 +64,15 @@ private class MemoryStore : TaskStore {
     override suspend fun replace(task: Task, expectedRevision: Long): WriteResult {
         check()
         val stored = tasks[task.id] ?: return WriteResult.Missing
-        if (stored.revision != expectedRevision) return WriteResult.Conflict
+        if (stored.version != expectedRevision) return WriteResult.Conflict
         tasks[task.id] = task
         return WriteResult.Written
     }
 
-    override suspend fun delete(id: UUID, expectedRevision: Long): WriteResult {
+    override suspend fun delete(id: TaskId, expectedRevision: Long): WriteResult {
         check()
         val stored = tasks[id] ?: return WriteResult.Missing
-        if (stored.revision != expectedRevision) return WriteResult.Conflict
+        if (stored.version != expectedRevision) return WriteResult.Conflict
         tasks.remove(id)
         return WriteResult.Written
     }
@@ -76,7 +82,14 @@ private fun tasksApp(
     store: MemoryStore = MemoryStore(),
     block: suspend ApplicationTestBuilder.() -> Unit,
 ) = testApplication {
-    application { tasksModule(Tasks(store)) }
+    application {
+        tasksModule(
+            taskFacade(
+                store,
+                Clock.fixed(Instant.parse("2026-11-23T10:00:00Z"), ZoneOffset.UTC),
+            ) { testTaskId },
+        )
+    }
     block()
 }
 
@@ -107,6 +120,7 @@ private suspend fun HttpResponse.json(): JsonObject =
 
 private const val CREATE = """{"title":"Renew card","description":"Bring proof","status":"todo","createdOn":"2026-11-21",
     "steps":[{"name":"Find proof","completed":false}]}"""
+private val testTaskId = TaskId("01ARZ3NDEKTSV4RRFFQ69G5FAV")
 
 private suspend fun HttpClient.create(body: String = CREATE): JsonObject =
     send("POST", "/api/tasks", body).json()
@@ -126,6 +140,7 @@ class TasksHttpTest : FunSpec({
 
             response.status shouldBe HttpStatusCode.Created
             val task = response.json()
+            TaskId.parse(task.id()) shouldBe testTaskId
             task.getValue("revision").jsonPrimitive.content shouldBe "1"
             task.getValue("status").jsonPrimitive.content shouldBe "todo"
             response.headers[HttpHeaders.ETag] shouldBe "\"1\""
@@ -139,29 +154,53 @@ class TasksHttpTest : FunSpec({
             val id = client.create().id()
 
             fun JsonArray.ids() = map { it.jsonObject.id() }
-            client.send("GET", "/api/tasks?date=2026-11-20").bodyAsText() shouldBe "[]"
+            client.send("GET", "/api/tasks?from=2026-11-20&to=2026-11-20").bodyAsText() shouldBe
+                "[]"
             Json.parseToJsonElement(
-                client.send("GET", "/api/tasks?date=2026-11-21").bodyAsText(),
+                client.send("GET", "/api/tasks?from=2026-11-21&to=2026-11-21").bodyAsText(),
             ).jsonArray.ids() shouldBe
                 listOf(id)
             Json.parseToJsonElement(
-                client.send("GET", "/api/tasks?date=2026-12-01").bodyAsText(),
+                client.send("GET", "/api/tasks?from=2026-12-01&to=2026-12-01").bodyAsText(),
             ).jsonArray.ids() shouldBe
                 listOf(id)
+        }
+    }
+
+    test("a range lists Tasks started on or before its end and not completed before its start") {
+        tasksApp {
+            val id = client.create().id()
+            suspend fun ids(query: String) = Json.parseToJsonElement(
+                client.send("GET", "/api/tasks?$query").bodyAsText(),
+            ).jsonArray.map { it.jsonObject.id() }
+
+            ids("from=2026-11-01&to=2026-11-20") shouldBe emptyList()
+            ids("from=2026-11-01&to=2026-11-21") shouldBe listOf(id)
+            ids("from=2026-11-25&to=2026-11-30") shouldBe listOf(id)
+        }
+    }
+
+    test("a Task created today is returned with startedOn and without completedOn") {
+        tasksApp {
+            val created = client.create()
+            created.getValue("startedOn").jsonPrimitive.content shouldBe "2026-11-21"
+            created.containsKey("completedOn") shouldBe false
         }
     }
 
     test("listing requires a valid date") {
         tasksApp {
             client.send("GET", "/api/tasks").status shouldBe HttpStatusCode.BadRequest
-            val response = client.send("GET", "/api/tasks?date=21-11-2026")
+            client.send("GET", "/api/tasks?from=2026-11-22&to=2026-11-21").status shouldBe
+                HttpStatusCode.BadRequest
+            val response = client.send("GET", "/api/tasks?from=21-11-2026&to=21-11-2026")
 
             response.status shouldBe HttpStatusCode.BadRequest
             response.headers[HttpHeaders.ContentType]?.startsWith(
                 "application/problem+json",
             ) shouldBe
                 true
-            response.json().violationFields() shouldBe listOf("date")
+            response.json().violationFields() shouldBe listOf("from", "to")
         }
     }
 
@@ -213,7 +252,7 @@ class TasksHttpTest : FunSpec({
             response.status shouldBe HttpStatusCode.OK
             response.headers[HttpHeaders.ETag] shouldBe "\"2\""
             response.json().toString() shouldBe
-                """{"id":"${created.id()}","createdOn":"2026-11-21","revision":2,"title":"New","status":"completed"}"""
+                """{"id":"${created.id()}","createdOn":"2026-11-21","startedOn":"2026-11-21","completedOn":"2026-11-23","revision":2,"title":"New","status":"completed"}"""
         }
     }
 
@@ -267,7 +306,10 @@ class TasksHttpTest : FunSpec({
             val stale = client.send("PATCH", path, """{"title":"Lost"}""", ifMatch = created.etag())
 
             stale.status shouldBe HttpStatusCode.PreconditionFailed
-            client.send("GET", "/api/tasks?date=2026-11-21").bodyAsText().contains("Lost") shouldBe
+            client.send(
+                "GET",
+                "/api/tasks?from=2026-11-21&to=2026-11-21",
+            ).bodyAsText().contains("Lost") shouldBe
                 false
         }
     }
@@ -276,7 +318,7 @@ class TasksHttpTest : FunSpec({
         tasksApp {
             client.send(
                 "PATCH",
-                "/api/tasks/${UUID.randomUUID()}",
+                "/api/tasks/01ARZ3NDEKTSV4RRFFQ69G5FAW",
                 """{"title":"x"}""",
                 ifMatch = "\"1\"",
             ).status shouldBe
@@ -296,7 +338,8 @@ class TasksHttpTest : FunSpec({
                 HttpStatusCode.PreconditionFailed
             client.send("DELETE", path, ifMatch = created.etag()).status shouldBe
                 HttpStatusCode.NoContent
-            client.send("GET", "/api/tasks?date=2026-11-21").bodyAsText() shouldBe "[]"
+            client.send("GET", "/api/tasks?from=2026-11-21&to=2026-11-21").bodyAsText() shouldBe
+                "[]"
             client.send("DELETE", path, ifMatch = created.etag()).status shouldBe
                 HttpStatusCode.NoContent
         }
@@ -315,7 +358,7 @@ class TasksHttpTest : FunSpec({
             ) shouldBe
                 true
             store.tasks.isEmpty() shouldBe true
-            client.send("GET", "/api/tasks?date=2026-11-21").status shouldBe
+            client.send("GET", "/api/tasks?from=2026-11-21&to=2026-11-21").status shouldBe
                 HttpStatusCode.ServiceUnavailable
         }
     }

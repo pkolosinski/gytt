@@ -22,6 +22,9 @@ dependencies {
     // persistence
     implementation(libs.couchbase.kotlin.client)
 
+    // identifiers
+    implementation(libs.ulid.creator)
+
     implementation(libs.logback.classic)
 
     // test

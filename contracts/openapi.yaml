@@ -28,16 +28,20 @@ paths:
     get:
       operationId: listTasks
       tags: [Tasks]
-      summary: List the Tasks shown for a date
+      summary: List the Tasks shown in a date range
       description: |
-        Returns the Tasks the board shows for `date`. Until the product defines
-        carry-forward rules, a Task is shown for every date on or after its
-        `createdOn`.
+        Returns the Tasks shown on at least one day from `from` to `to`
+        (inclusive). A Task is shown from its `startedOn` day until its
+        `completedOn` day, or indefinitely while it is not completed. So the
+        result holds every Task that started on or before `to` and is either
+        not completed or was completed on or after `from`. Until scheduling
+        exists, `startedOn` equals `createdOn`.
       parameters:
-        - $ref: "#/components/parameters/Date"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
       responses:
         "200":
-          description: The Tasks for the date, in no guaranteed order.
+          description: The Tasks shown in the range, in no guaranteed order.
           content:
             application/json:
               schema:
@@ -45,7 +49,12 @@ paths:
                 items:
                   $ref: "#/components/schemas/Task"
         "400":
-          $ref: "#/components/responses/BadRequest"
+          description: |
+            `from` or `to` is missing or not a date, or `from` is after `to`.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
     post:
@@ -153,11 +162,18 @@ paths:
           $ref: "#/components/responses/ServiceUnavailable"
 components:
   parameters:
-    Date:
-      name: date
+    From:
+      name: from
       in: query
       required: true
-      description: Calendar date in `YYYY-MM-DD` form.
+      description: First day of the range, inclusive, in `YYYY-MM-DD` form.
+      schema:
+        $ref: "#/components/schemas/LocalDate"
+    To:
+      name: to
+      in: query
+      required: true
+      description: Last day of the range, inclusive, in `YYYY-MM-DD` form. Not before `from`.
       schema:
         $ref: "#/components/schemas/LocalDate"
     TaskId:
@@ -165,8 +181,7 @@ components:
       in: path
       required: true
       schema:
-        type: string
-        format: uuid
+        $ref: "#/components/schemas/Ulid"
     IfMatch:
       name: If-Match
       in: header
@@ -227,6 +242,13 @@ components:
       format: date
       description: A calendar date without a time zone, in `YYYY-MM-DD` form.
       examples: ["2026-11-21"]
+    Ulid:
+      type: string
+      format: ulid
+      minLength: 26
+      maxLength: 26
+      pattern: '^[0-7][0-9A-HJKMNP-TV-Z]{25}$'
+      description: A canonical, uppercase ULID in Crockford Base32 form.
     TaskStatus:
       type: string
       enum: [todo, inProgress, completed]
@@ -294,13 +316,22 @@ components:
       allOf:
         - $ref: "#/components/schemas/TaskFields"
         - type: object
-          required: [id, createdOn, revision]
+          required: [id, createdOn, startedOn, revision]
           properties:
             id:
-              type: string
-              format: uuid
+              $ref: "#/components/schemas/Ulid"
             createdOn:
               $ref: "#/components/schemas/LocalDate"
+            startedOn:
+              $ref: "#/components/schemas/LocalDate"
+              description: |
+                The first day the Task is shown: the day it was scheduled, which
+                is its `createdOn` day until scheduling exists.
+            completedOn:
+              $ref: "#/components/schemas/LocalDate"
+              description: |
+                The day the Task was completed. Present only while `status` is
+                `completed`; moving the Task to another status removes it.
             revision:
               type: integer
               minimum: 1

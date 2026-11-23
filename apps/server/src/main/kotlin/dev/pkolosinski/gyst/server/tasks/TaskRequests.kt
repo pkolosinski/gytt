@@ -5,7 +5,7 @@ import arrow.core.left
 import arrow.core.right
 import dev.pkolosinski.gyst.core.tasks.DescriptionChange
 import dev.pkolosinski.gyst.core.tasks.NewTask
-import dev.pkolosinski.gyst.core.tasks.TaskFields
+import dev.pkolosinski.gyst.core.tasks.TaskDetails
 import dev.pkolosinski.gyst.core.tasks.TaskPatch
 import dev.pkolosinski.gyst.core.tasks.TaskStatus
 import dev.pkolosinski.gyst.core.tasks.TaskStep
@@ -37,8 +37,11 @@ private class Reader(private val path: String = "") {
                 violations +=
                     Violation(field(name), "Is required")
             }
+
             element == null -> null
+
             element is JsonPrimitive && element.isString -> element.content
+
             else -> null.also { violations += Violation(field(name), "Must be a string") }
         }
     }
@@ -99,12 +102,29 @@ internal fun parseObject(body: String): JsonObject? = try {
     null
 }
 
-internal fun parseDate(text: String?): Either<List<Violation>, LocalDate> = when {
-    text == null -> listOf(Violation("date", "Is required")).left()
+private fun parseDate(name: String, text: String?): Either<Violation, LocalDate> = when {
+    text == null -> Violation(name, "Is required").left()
+
     else -> try {
         LocalDate.parse(text).right()
     } catch (_: DateTimeException) {
-        listOf(Violation("date", "Must be a date in YYYY-MM-DD form")).left()
+        Violation(name, "Must be a date in YYYY-MM-DD form").left()
+    }
+}
+
+internal fun parseDateRange(
+    from: String?,
+    to: String?,
+): Either<List<Violation>, Pair<LocalDate, LocalDate>> {
+    val parsedFrom = parseDate("from", from)
+    val parsedTo = parseDate("to", to)
+    val violations = listOfNotNull(parsedFrom.leftOrNull(), parsedTo.leftOrNull())
+    if (violations.isNotEmpty()) return violations.left()
+    val range = parsedFrom.getOrNull()!! to parsedTo.getOrNull()!!
+    return if (range.first > range.second) {
+        listOf(Violation("from", "Must not be after to")).left()
+    } else {
+        range.right()
     }
 }
 
@@ -121,18 +141,18 @@ internal fun parseNewTask(body: JsonObject): Either<List<Violation>, NewTask> {
     }
 }
 
-internal fun parseFields(body: JsonObject): Either<List<Violation>, TaskFields> {
+internal fun parseFields(body: JsonObject): Either<List<Violation>, TaskDetails> {
     val reader = Reader()
     return parseFields(reader, body)?.right() ?: reader.violations.left()
 }
 
-private fun parseFields(reader: Reader, body: JsonObject): TaskFields? {
+private fun parseFields(reader: Reader, body: JsonObject): TaskDetails? {
     val title = reader.string(body, "title", required = true)
     val description = reader.string(body, "description", required = false)
     val status = reader.status(body)
     val steps = reader.steps(body)
     return if (reader.violations.isEmpty()) {
-        TaskFields(
+        TaskDetails(
             title!!,
             description,
             status!!,
@@ -148,7 +168,9 @@ internal fun parsePatch(body: JsonObject): Either<List<Violation>, TaskPatch> {
     val title = reader.string(body, "title", required = false)
     val description = when {
         "description" !in body -> DescriptionChange.Keep
+
         body["description"] == JsonNull -> DescriptionChange.Clear
+
         else -> reader.string(
             body,
             "description",

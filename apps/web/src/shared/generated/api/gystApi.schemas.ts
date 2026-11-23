@@ -4,9 +4,6 @@
  * GYST API
  * HTTP contract between the GYST web application and the GYST server.
  *
- * GYST is a private, single-user product: the API has no accounts, sessions,
- * or per-record permissions.
- *
  * Every response carries an `X-Request-Id` trace ID header. A well-formed
  * `X-Request-Id` request header is echoed back; otherwise the server
  * generates one.
@@ -26,6 +23,14 @@
  * A calendar date without a time zone, in `YYYY-MM-DD` form.
  */
 export type LocalDate = string;
+
+/**
+ * A canonical, uppercase ULID in Crockford Base32 form.
+ * @minLength 26
+ * @maxLength 26
+ * @pattern ^[0-7][0-9A-HJKMNP-TV-Z]{25}$
+ */
+export type Ulid = string;
 
 export type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
 
@@ -93,8 +98,18 @@ export interface TaskPatch {
 }
 
 export type Task = TaskFields & {
-  id: string;
+  id: Ulid;
   createdOn: LocalDate;
+  /**
+     * The first day the Task is shown: the day it was scheduled, which
+     * is its `createdOn` day until scheduling exists.
+     */
+  startedOn: LocalDate;
+  /**
+     * The day the Task was completed. Present only while `status` is
+     * `completed`; moving the Task to another status removes it.
+     */
+  completedOn?: LocalDate;
   /**
      * Increments on every change. Send it as the strong ETag
      * (`"<revision>"`) in `If-Match` when updating or deleting.
@@ -150,7 +165,9 @@ export type PreconditionRequiredResponse = Problem;
  */
 export type ServiceUnavailableResponse = Problem;
 
-export type DateParameter = LocalDate;
+export type FromParameter = LocalDate;
+
+export type ToParameter = LocalDate;
 
 /**
  * The Task's last seen revision as a strong ETag, for example `"3"`.
@@ -161,6 +178,10 @@ export type ListTasksParams = {
 /**
  * A calendar date without a time zone, in `YYYY-MM-DD` form.
  */
-date: DateParameter;
+from: FromParameter;
+/**
+ * A calendar date without a time zone, in `YYYY-MM-DD` form.
+ */
+to: ToParameter;
 };
 

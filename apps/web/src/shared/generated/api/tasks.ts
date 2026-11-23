@@ -4,9 +4,6 @@
  * GYST API
  * HTTP contract between the GYST web application and the GYST server.
  *
- * GYST is a private, single-user product: the API has no accounts, sessions,
- * or per-record permissions.
- *
  * Every response carries an `X-Request-Id` trace ID header. A well-formed
  * `X-Request-Id` request header is echoed back; otherwise the server
  * generates one.
@@ -29,6 +26,7 @@ import type {
   NotFoundResponse,
   PreconditionFailedResponse,
   PreconditionRequiredResponse,
+  Problem,
   ServiceUnavailableResponse,
   Task,
   TaskFields,
@@ -44,7 +42,7 @@ export type listTasksResponse200 = {
 }
 
 export type listTasksResponse400 = {
-  data: BadRequestResponse
+  data: Problem
   status: 400
 }
 
@@ -78,10 +76,13 @@ export const getListTasksUrl = (params: ListTasksParams,) => {
 }
 
 /**
- * Returns the Tasks the board shows for `date`. Until the product defines
- * carry-forward rules, a Task is shown for every date on or after its
- * `createdOn`.
- * @summary List the Tasks shown for a date
+ * Returns the Tasks shown on at least one day from `from` to `to`
+ * (inclusive). A Task is shown from its `startedOn` day until its
+ * `completedOn` day, or indefinitely while it is not completed. So the
+ * result holds every Task that started on or before `to` and is either
+ * not completed or was completed on or after `from`. Until scheduling
+ * exists, `startedOn` equals `createdOn`.
+ * @summary List the Tasks shown in a date range
  */
 export const listTasks = async (params: ListTasksParams, options?: RequestInit): Promise<listTasksResponse> => {
 

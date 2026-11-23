@@ -1,7 +1,9 @@
 package dev.pkolosinski.gyst.server
 
 import com.couchbase.client.kotlin.Cluster
-import dev.pkolosinski.gyst.core.tasks.Tasks
+import com.github.f4b6a3.ulid.UlidCreator
+import dev.pkolosinski.gyst.core.tasks.TaskId
+import dev.pkolosinski.gyst.core.tasks.taskFacade
 import dev.pkolosinski.gyst.server.infrastructure.CouchbaseProperties
 import dev.pkolosinski.gyst.server.infrastructure.ReadinessResult
 import dev.pkolosinski.gyst.server.infrastructure.configureInfrastructureModule
@@ -39,7 +41,12 @@ fun Application.rootModule() {
             ReadinessResult.unhealthy("database_unavailable")
         }
     }
-    tasksModule(Tasks(CouchbaseTaskStore(cluster, couchbaseProperties.bucket)))
+    tasksModule(
+        taskFacade(
+            CouchbaseTaskStore(cluster, couchbaseProperties.bucket),
+            idGenerator = { TaskId(UlidCreator.getUlid().toString()) },
+        ),
+    )
     routing {
         staticResources("/", "web")
     }

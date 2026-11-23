@@ -10,12 +10,11 @@ import com.couchbase.client.kotlin.query.QueryParameters
 import com.couchbase.client.kotlin.query.QueryScanConsistency
 import com.couchbase.client.kotlin.query.execute
 import dev.pkolosinski.gyst.core.tasks.Task
+import dev.pkolosinski.gyst.core.tasks.TaskId
 import dev.pkolosinski.gyst.core.tasks.TaskStore
 import dev.pkolosinski.gyst.core.tasks.TaskStoreUnavailableException
 import dev.pkolosinski.gyst.core.tasks.WriteResult
-import kotlinx.serialization.encodeToString
 import java.time.LocalDate
-import java.util.UUID
 
 private const val TASKS_COLLECTION = "tasks"
 
@@ -31,37 +30,42 @@ internal class CouchbaseTaskStore(
         cluster.bucket(bucketName).defaultScope().collection(TASKS_COLLECTION),
     )
 
-    override suspend fun listCreatedOnOrBefore(date: LocalDate): List<Task> = unavailableOnFailure {
-        cluster.query(
-            "SELECT RAW t FROM `$bucketName`.`_default`.`$TASKS_COLLECTION` AS t WHERE t.createdOn <= \$date",
-            parameters = QueryParameters.named { param("date", date.toString()) },
-            consistency = QueryScanConsistency.requestPlus(),
-        ).execute().rows.map {
-            taskJson.decodeFromString<TaskJson>(it.content.decodeToString()).toTask()
+    override suspend fun listActiveOrderedByCreatedAt(from: LocalDate, to: LocalDate): List<Task> =
+        unavailableOnFailure {
+            cluster.query(
+                "SELECT RAW t FROM `$bucketName`.`_default`.`$TASKS_COLLECTION` AS t " +
+                    "WHERE t.createdOn <= \$to AND (t.completedOn IS NOT VALUED OR t.completedOn >= \$from)",
+                parameters = QueryParameters.named {
+                    param("from", from.toString())
+                    param("to", to.toString())
+                },
+                consistency = QueryScanConsistency.requestPlus(),
+            ).execute().rows.map {
+                taskJson.decodeFromString<TaskJson>(it.content.decodeToString()).toTask()
+            }
         }
-    }
 
-    override suspend fun find(id: UUID): Task? = unavailableOnFailure {
+    override suspend fun find(id: TaskId): Task? = unavailableOnFailure {
         try {
-            collection.get(id.toString()).content.bytes.decodeToString().toTask()
+            collection.get(id.value).content.bytes.decodeToString().toTask()
         } catch (_: DocumentNotFoundException) {
             null
         }
     }
 
     override suspend fun insert(task: Task) = unavailableOnFailure {
-        collection.insert(task.id.toString(), task.toContent())
+        collection.insert(task.id.value, task.toContent())
         Unit
     }
 
     override suspend fun replace(task: Task, expectedRevision: Long): WriteResult =
         unavailableOnFailure {
             try {
-                val stored = collection.get(task.id.toString())
-                if (stored.content.bytes.decodeToString().toTask().revision != expectedRevision) {
+                val stored = collection.get(task.id.value)
+                if (stored.content.bytes.decodeToString().toTask().version != expectedRevision) {
                     WriteResult.Conflict
                 } else {
-                    collection.replace(task.id.toString(), task.toContent(), cas = stored.cas)
+                    collection.replace(task.id.value, task.toContent(), cas = stored.cas)
                     WriteResult.Written
                 }
             } catch (_: DocumentNotFoundException) {
@@ -71,14 +75,14 @@ internal class CouchbaseTaskStore(
             }
         }
 
-    override suspend fun delete(id: UUID, expectedRevision: Long): WriteResult =
+    override suspend fun delete(id: TaskId, expectedRevision: Long): WriteResult =
         unavailableOnFailure {
             try {
-                val stored = collection.get(id.toString())
-                if (stored.content.bytes.decodeToString().toTask().revision != expectedRevision) {
+                val stored = collection.get(id.value)
+                if (stored.content.bytes.decodeToString().toTask().version != expectedRevision) {
                     WriteResult.Conflict
                 } else {
-                    collection.remove(id.toString(), cas = stored.cas)
+                    collection.remove(id.value, cas = stored.cas)
                     WriteResult.Written
                 }
             } catch (_: DocumentNotFoundException) {

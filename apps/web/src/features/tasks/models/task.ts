@@ -11,6 +11,10 @@ export type TaskListItem = {
   title: string;
   description?: string;
   createdOn: LocalDate;
+  /** The first day the Task is shown; its creation day until scheduling exists. */
+  startedOn: LocalDate;
+  /** The day the Task was completed; absent unless its status is `completed`. */
+  completedOn?: LocalDate;
   /** The last revision seen from the server; sent as the precondition for changes. */
   revision: number;
   status: TaskStatus;

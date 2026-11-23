@@ -1,49 +1,51 @@
 package dev.pkolosinski.gyst.core.tasks
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.getOrElse
+import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
 
-enum class TaskStatus { TODO, IN_PROGRESS, COMPLETED }
+@JvmInline
+value class TaskId(val value: String)
 
-data class TaskStep(val name: String, val completed: Boolean)
+data class Task(
+    val id: TaskId,
+    val details: TaskDetails,
+    val createdAt: Instant,
+    /** Starts at 1 and increases on every change. */
+    val version: Long = 1L,
+) {
+    fun withUpdate(newDetails: TaskDetails): Task = copy(
+        details = newDetails,
+        version = version + 1,
+    )
+}
 
-/** The fields a user edits on a Task. */
-data class TaskFields(
+data class TaskDetails(
     val title: String,
     val description: String?,
     val status: TaskStatus,
-    val steps: List<TaskStep>?,
-)
-
-/** A Task to create; [createdOn] is the date the user created it on. */
-data class NewTask(val createdOn: LocalDate, val fields: TaskFields)
-
-data class Task(
-    val id: UUID,
-    val createdOn: LocalDate,
-    /** Starts at 1 and increases on every change. */
-    val revision: Long,
-    val fields: TaskFields,
-)
-
-sealed interface DescriptionChange {
-    data object Keep : DescriptionChange
-
-    data object Clear : DescriptionChange
-
-    data class Replace(val text: String) : DescriptionChange
-}
-
-/** A partial update: `null` leaves a part unchanged; an empty [steps] list removes all steps. */
-data class TaskPatch(
-    val title: String? = null,
-    val description: DescriptionChange = DescriptionChange.Keep,
-    val status: TaskStatus? = null,
-    val steps: List<TaskStep>? = null,
+    val steps: List<TaskStep>,
+    val startedOn: LocalDate,
+    val completedOn: LocalDate? = null,
 ) {
-    val isEmpty: Boolean
-        get() = title == null &&
-            description == DescriptionChange.Keep &&
-            status == null &&
-            steps == null
+    fun apply(patch: TaskPatch): TaskDetails = copy(
+        title = patch.title.getOrElse { this.title },
+        description = patch.description.getOrElse { this.description },
+        status = patch.status.getOrElse { this.status },
+        steps = patch.steps.getOrElse { this.steps },
+    )
 }
+
+enum class TaskStatus { TODO, IN_PROGRESS, COMPLETED, ARCHIVED }
+
+data class TaskStep(val text: String, val completed: Boolean)
+
+/** A partial update: `arrow.core.None` leaves a part unchanged. */
+data class TaskPatch(
+    val title: Option<String> = None,
+    val description: Option<String?> = None,
+    val status: Option<TaskStatus> = None,
+    val steps: Option<List<TaskStep>> = None,
+)

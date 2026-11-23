@@ -8,6 +8,7 @@ ktor = "3.6.0"
 logback = "1.5.37"
 mockk = "1.14.11"
 testcontainers = "2.0.5"
+ulid-creator = "5.2.4"
 
 [libraries]
 # gradle plugins
@@ -22,6 +23,7 @@ arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref 
 # couchbase
 couchbase-kotlin-client = { module = "com.couchbase.client:kotlin-client", version.ref = "couchbase" }
 testcontainers-couchbase = { module = "org.testcontainers:testcontainers-couchbase", version.ref = "testcontainers" }
+ulid-creator = { module = "com.github.f4b6a3:ulid-creator", version.ref = "ulid-creator" }
 
 # kotest
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }

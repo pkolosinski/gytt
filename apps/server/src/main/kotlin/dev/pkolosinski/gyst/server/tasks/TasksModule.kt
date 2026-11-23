@@ -3,8 +3,9 @@ package dev.pkolosinski.gyst.server.tasks
 import arrow.core.Either
 import dev.pkolosinski.gyst.core.tasks.Task
 import dev.pkolosinski.gyst.core.tasks.TaskError
+import dev.pkolosinski.gyst.core.tasks.TaskFacade
+import dev.pkolosinski.gyst.core.tasks.TaskId
 import dev.pkolosinski.gyst.core.tasks.TaskStoreUnavailableException
-import dev.pkolosinski.gyst.core.tasks.Tasks
 import dev.pkolosinski.gyst.core.tasks.Violation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -25,10 +26,8 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("dev.pkolosinski.gyst.server.tasks")
 private val problemContentType = ContentType.parse("application/problem+json")
@@ -46,17 +45,18 @@ private data class ProblemJson(
 private data class ViolationJson(val field: String, val message: String)
 
 /** The Tasks endpoints of the HTTP contract. */
-fun Application.tasksModule(tasks: Tasks) {
+fun Application.tasksModule(taskFacade: TaskFacade) {
     routing {
         route("/api/tasks") {
             get {
                 respondGuarded {
-                    parseDate(call.request.queryParameters["date"]).fold(
+                    val query = call.request.queryParameters
+                    parseDateRange(query["from"], query["to"]).fold(
                         { call.respondInvalid(it) },
-                        { date ->
+                        { (from, to) ->
                             val body = taskJson.encodeToString(
                                 ListSerializer(TaskJson.serializer()),
-                                tasks.list(date).map(Task::toJson),
+                                taskFacade.list(from, to).map(Task::toJson),
                             )
                             call.respondText(body, ContentType.Application.Json)
                         },
@@ -70,10 +70,13 @@ fun Application.tasksModule(tasks: Tasks) {
                         { call.respondInvalid(it) },
                         { newTask ->
                             call.respondTask(
-                                tasks.create(newTask),
+                                taskFacade.create(newTask),
                                 HttpStatusCode.Created,
                             ) { task ->
-                                call.response.header(HttpHeaders.Location, "/api/tasks/${task.id}")
+                                call.response.header(
+                                    HttpHeaders.Location,
+                                    "/api/tasks/${task.id.value}",
+                                )
                             }
                         },
                     )
@@ -88,7 +91,7 @@ fun Application.tasksModule(tasks: Tasks) {
                             { call.respondInvalid(it) },
                             {
                                 call.respondTask(
-                                    tasks.replace(target.id, target.revision, it),
+                                    taskFacade.update(target.id, target.revision, it),
                                     HttpStatusCode.OK,
                                 )
                             },
@@ -103,7 +106,7 @@ fun Application.tasksModule(tasks: Tasks) {
                             { call.respondInvalid(it) },
                             {
                                 call.respondTask(
-                                    tasks.update(target.id, target.revision, it),
+                                    taskFacade.patch(target.id, target.revision, it),
                                     HttpStatusCode.OK,
                                 )
                             },
@@ -113,13 +116,13 @@ fun Application.tasksModule(tasks: Tasks) {
                 delete {
                     respondGuarded {
                         val id =
-                            call.parameters["taskId"].toUuid()
+                            call.parameters["taskId"].toTaskId()
                                 ?: return@respondGuarded call.respondProblem(
                                     HttpStatusCode.NotFound,
                                     "Task not found",
                                 )
                         val revision = call.requestedRevision() ?: return@respondGuarded
-                        when (val result = tasks.delete(id, revision)) {
+                        when (val result = taskFacade.archive(id, revision)) {
                             is Either.Left -> call.respondError(result.value)
                             is Either.Right -> call.respond(HttpStatusCode.NoContent)
                         }
@@ -130,11 +133,11 @@ fun Application.tasksModule(tasks: Tasks) {
     }
 }
 
-private class Target(val id: UUID, val revision: Long)
+private class Target(val id: TaskId, val revision: Long)
 
 /** The Task and revision a request refers to; responds and returns null if either is unusable. */
 private suspend fun RoutingContext.target(): Target? {
-    val id = call.parameters["taskId"].toUuid()
+    val id = call.parameters["taskId"].toTaskId()
     if (id == null) {
         call.respondProblem(HttpStatusCode.NotFound, "Task not found")
         return null
@@ -143,11 +146,7 @@ private suspend fun RoutingContext.target(): Target? {
     return Target(id, revision)
 }
 
-private fun String?.toUuid(): UUID? = try {
-    UUID.fromString(this)
-} catch (_: IllegalArgumentException) {
-    null
-}
+private fun String?.toTaskId(): TaskId? = this?.let { TaskId.parse(it) }
 
 /** Reads the revision from `If-Match`. A missing header gets 428; one naming no revision gets 412. */
 private suspend fun ApplicationCall.requestedRevision(): Long? {
@@ -199,13 +198,13 @@ private suspend fun ApplicationCall.respondTask(
     extras: (Task) -> Unit = {},
 ) = result.fold({ respondError(it) }, { task ->
     extras(task)
-    response.header(HttpHeaders.ETag, "\"${task.revision}\"")
+    response.header(HttpHeaders.ETag, "\"${task.version}\"")
     respondText(taskJson.encodeToString(task.toJson()), ContentType.Application.Json, status)
 })
 
 private suspend fun ApplicationCall.respondError(error: TaskError) = when (error) {
-    is TaskError.Invalid -> respondInvalid(error.violations)
     is TaskError.NotFound -> respondProblem(HttpStatusCode.NotFound, "Task not found")
+
     is TaskError.RevisionMismatch ->
         respondProblem(
             HttpStatusCode.PreconditionFailed,

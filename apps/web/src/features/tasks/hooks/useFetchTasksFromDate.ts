@@ -12,9 +12,9 @@ import {
 
 export function useFetchTasksFromDate(date: LocalDate) {
   const { data, status, error } = useQuery({
-    queryKey: ['listTasks', date],
+    queryKey: ['listTasks', date, date],
     queryFn: async () => {
-      const res = await tasksApi.listTasks(date);
+      const res = await tasksApi.listTasks(date, date);
       return toTasksFromDate(date, res);
     },
   });

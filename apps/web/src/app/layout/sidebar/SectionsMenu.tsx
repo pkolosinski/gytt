@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 
-import { LayoutDashboard, ListTodo, Repeat2, type LucideIcon } from 'lucide-react';
+import { CircleCheckBig, LayoutDashboard, Repeat, type LucideIcon } from 'lucide-react';
 
 import {
   SidebarGroup,
@@ -14,8 +14,8 @@ import {
 
 const sections = [
   { id: 'dashboard', icon: LayoutDashboard, link: '/' },
-  { id: 'tasks', icon: ListTodo, link: '/tasks' },
-  { id: 'habits', icon: Repeat2, link: '/habits/day' },
+  { id: 'tasks', icon: CircleCheckBig, link: '/tasks' },
+  { id: 'habits', icon: Repeat, link: '/habits/day' },
 ];
 
 export function SectionsMenu() {

@@ -1,0 +1,335 @@
+openapi: 3.1.0
+info:
+  title: GYTT API
+  version: 0.1.0
+  description: |
+    HTTP contract between the GYTT web application and the GYTT server.
+
+    GYTT is a private, single-user product: the API has no accounts, sessions,
+    or per-record permissions.
+
+    Every response carries an `X-Request-Id` trace ID header. A well-formed
+    `X-Request-Id` request header is echoed back; otherwise the server
+    generates one.
+
+    ## Concurrency
+
+    Every Task has a `revision` that the server increments on each change. The
+    same value is exposed as the strong `ETag` header (`"<revision>"`) on single
+    Task responses. Updating or deleting a Task requires an `If-Match` header
+    containing the revision the client last saw. A stale revision is rejected
+    with `412` and nothing is written, so a newer save is never silently
+    overwritten.
+servers:
+  - url: /api
+    description: Same-origin API
+tags:
+  - name: Tasks
+    description: One-off tasks with a small set of progress states and optional steps.
+paths:
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [Tasks]
+      summary: List the Tasks shown for a date
+      description: |
+        Returns the Tasks the board shows for `date`. Until the product defines
+        carry-forward rules, a Task is shown for every date on or after its
+        `createdOn`.
+      parameters:
+        - $ref: "#/components/parameters/Date"
+      responses:
+        "200":
+          description: The Tasks for the date, in no guaranteed order.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      operationId: createTask
+      tags: [Tasks]
+      summary: Create a Task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewTask"
+      responses:
+        "201":
+          description: The Task was created.
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Location:
+              description: URL of the created Task.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tasks/{taskId}:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    put:
+      operationId: replaceTask
+      tags: [Tasks]
+      summary: Replace the editable fields of a Task
+      description: |
+        Replaces title, description, status, and steps. An omitted `description`
+        or `steps` clears it. `id` and `createdOn` never change.
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskFields"
+      responses:
+        "200":
+          $ref: "#/components/responses/TaskUpdated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "428":
+          $ref: "#/components/responses/PreconditionRequired"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    patch:
+      operationId: updateTask
+      tags: [Tasks]
+      summary: Change some fields of a Task
+      description: |
+        Applies a partial update. Omitted fields are unchanged. `description:
+        null` clears the description and `steps: []` removes all steps. An
+        empty object is rejected.
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/TaskUpdated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "428":
+          $ref: "#/components/responses/PreconditionRequired"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    delete:
+      operationId: deleteTask
+      tags: [Tasks]
+      summary: Delete a Task
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      responses:
+        "204":
+          description: The Task was deleted.
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "428":
+          $ref: "#/components/responses/PreconditionRequired"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+components:
+  parameters:
+    Date:
+      name: date
+      in: query
+      required: true
+      description: Calendar date in `YYYY-MM-DD` form.
+      schema:
+        $ref: "#/components/schemas/LocalDate"
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: The Task's last seen revision as a strong ETag, for example `"3"`.
+      schema:
+        type: string
+        pattern: '^"[0-9]+"$'
+  headers:
+    ETag:
+      description: The Task's current revision as a strong ETag, for example `"3"`.
+      schema:
+        type: string
+        pattern: '^"[0-9]+"$'
+  responses:
+    TaskUpdated:
+      description: The Task was updated.
+      headers:
+        ETag:
+          $ref: "#/components/headers/ETag"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Task"
+    BadRequest:
+      description: The request is malformed or a value is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: The Task does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    PreconditionFailed:
+      description: The Task changed since the revision in `If-Match`. Nothing was written.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    PreconditionRequired:
+      description: The `If-Match` header is missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ServiceUnavailable:
+      description: The database is unavailable. Nothing was saved.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    LocalDate:
+      type: string
+      format: date
+      description: A calendar date without a time zone, in `YYYY-MM-DD` form.
+      examples: ["2026-11-21"]
+    TaskStatus:
+      type: string
+      enum: [todo, inProgress, completed]
+    TaskStep:
+      type: object
+      required: [name, completed]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        completed:
+          type: boolean
+    TaskFields:
+      type: object
+      description: The fields a user edits on a Task.
+      required: [title, status]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        steps:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/TaskStep"
+    NewTask:
+      description: A Task to create. `createdOn` is the date the user created it on.
+      allOf:
+        - $ref: "#/components/schemas/TaskFields"
+        - type: object
+          required: [createdOn]
+          properties:
+            createdOn:
+              $ref: "#/components/schemas/LocalDate"
+    TaskPatch:
+      type: object
+      description: A partial Task update. At least one property is required.
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: [string, "null"]
+          minLength: 1
+          maxLength: 1000
+          description: A new description, or `null` to clear it.
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        steps:
+          type: array
+          description: The complete new list of steps; an empty array removes all steps.
+          items:
+            $ref: "#/components/schemas/TaskStep"
+    Task:
+      allOf:
+        - $ref: "#/components/schemas/TaskFields"
+        - type: object
+          required: [id, createdOn, revision]
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdOn:
+              $ref: "#/components/schemas/LocalDate"
+            revision:
+              type: integer
+              minimum: 1
+              description: |
+                Increments on every change. Send it as the strong ETag
+                (`"<revision>"`) in `If-Match` when updating or deleting.
+    Problem:
+      type: object
+      description: An error response in the shape of RFC 9457 problem details.
+      required: [title, status]
+      properties:
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        violations:
+          type: array
+          description: Invalid request fields, when the problem is a validation failure.
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field:
+                type: string
+                description: Path to the invalid field, for example `steps[1].name`.
+              message:
+                type: string

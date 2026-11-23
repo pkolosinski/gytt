@@ -34,10 +34,11 @@
     "dragEnd": "“{{title}}” was dropped in {{column}}.",
     "dropOutside": "“{{title}}” was dropped outside the columns and did not move.",
     "dragCancel": "Moving “{{title}}” was cancelled.",
-    "instructions": "Open Task details to change its status."
+    "instructions": "Drag a task to a column, or change its status at the bottom of the card."
   },
   "column": {
     "count": "{{count}} in {{status}}",
+    "cancel": "Cancel",
     "create": "Create",
     "createIn": "Create task in {{status}}"
   },
@@ -65,9 +66,9 @@
     "yes": "Yes",
     "no": "No"
   },
-  "statusMenu": {
-    "trigger": "{{status}}: move “{{title}}”",
-    "moveTo": "Move to"
+  "statusSelect": {
+    "label": "Status of “{{title}}”",
+    "field": "Status"
   },
   "moves": {
     "moved": "Moved “{{title}}” to {{status}}.",
@@ -76,8 +77,10 @@
     "unavailable": "“{{title}}” could not be moved because the local service did not respond. Try again."
   },
   "modal": {
+    "createDescription": "Add a task to your board.",
     "createTitle": "Create new task",
     "taskTitle": "Task",
+    "editDescription": "Update this task.",
     "editTitle": "Edit task",
     "loading": "Loading task…",
     "unavailableTitle": "Task unavailable",

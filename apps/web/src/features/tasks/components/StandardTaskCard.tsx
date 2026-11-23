@@ -4,7 +4,8 @@ import { cn } from 'cn';
 import { CalendarClock } from 'lucide-react';
 
 import { formatLocalDateShort, type LocalDate } from '@/shared/lib/local-date.ts';
-import type { TaskListItem } from '../models/task.ts';
+import type { TaskListItem, TaskStatus } from '../models/task.ts';
+import { TaskStatusSelect } from './TaskStatusSelect.tsx';
 import { TaskStepList } from './TaskStepList.tsx';
 
 export const taskCardClassName =
@@ -13,18 +14,36 @@ export const taskCardClassName =
 interface StandardTaskCardProps {
   selectedDate: LocalDate;
   task: TaskListItem;
+  onOpen?: () => void;
+  onMove?: (status: TaskStatus) => void;
+  onToggleStep?: (index: number, completed: boolean) => void;
+  stepsDisabled?: boolean;
 }
 
-export function StandardTaskCard({ selectedDate, task }: StandardTaskCardProps) {
+export function StandardTaskCard({
+  selectedDate,
+  task,
+  onOpen,
+  onMove,
+  onToggleStep,
+  stepsDisabled,
+}: StandardTaskCardProps) {
   return (
-    <article className={taskCardClassName} data-task-id={task.id}>
+    <article
+      className={cn(taskCardClassName, 'relative transition-colors hover:bg-accent/50')}
+      data-task-id={task.id}
+    >
       <div className="flex min-w-0 flex-col gap-2">
         <h3 className="m-0 text-base font-medium text-foreground">
-          <TaskTitle task={task} />
+          <TaskTitle onOpen={onOpen} task={task} />
         </h3>
         <TaskCardDetails task={task} />
-        <TaskStepList steps={task.steps} />
-        <TaskCardSince selectedDate={selectedDate} task={task} />
+        <TaskStepList
+          disabled={stepsDisabled || task.status === 'completed'}
+          onToggle={onToggleStep}
+          steps={task.steps}
+        />
+        <TaskCardFooter onMove={onMove} selectedDate={selectedDate} task={task} />
       </div>
     </article>
   );
@@ -32,18 +51,22 @@ export function StandardTaskCard({ selectedDate, task }: StandardTaskCardProps) 
 
 interface TaskTitleProps {
   task: TaskListItem;
+  onOpen?: () => void;
 }
 
-function TaskTitle({ task }: TaskTitleProps) {
+/** The title is the card's button; its pseudo-element stretches the click target over the card. */
+function TaskTitle({ task, onOpen }: TaskTitleProps) {
   return (
-    <span
+    <button
       className={cn(
-        'line-clamp-1 break-words',
+        'line-clamp-1 w-full cursor-pointer text-left break-words outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:ring-3 focus-visible:after:ring-ring/50',
         task.status === 'completed' && 'text-muted-foreground',
       )}
+      onClick={onOpen}
+      type="button"
     >
       {task.title}
-    </span>
+    </button>
   );
 }
 
@@ -60,6 +83,31 @@ function TaskCardDetails({ task }: TaskCardDetailsProps) {
         </p>
       )}
     </>
+  );
+}
+
+interface TaskCardFooterProps {
+  selectedDate: LocalDate;
+  task: TaskListItem;
+  onMove?: (status: TaskStatus) => void;
+}
+
+/** The start date and the status, which stays editable above the card's click target. */
+function TaskCardFooter({ selectedDate, task, onMove }: TaskCardFooterProps) {
+  const { t } = useTranslation('tasks');
+
+  return (
+    <div className="flex items-center gap-2 empty:hidden">
+      <TaskCardSince selectedDate={selectedDate} task={task} />
+      {onMove && (
+        <TaskStatusSelect
+          className="relative z-10 ml-auto"
+          label={t('statusSelect.label', { title: task.title })}
+          onChange={onMove}
+          value={task.status}
+        />
+      )}
+    </div>
   );
 }
 

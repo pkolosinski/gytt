@@ -7,8 +7,8 @@ import dev.pkolosinski.gytt.server.infrastructure.TRACE_ID_HEADER
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.ktor.client.request.header
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import org.slf4j.LoggerFactory
 

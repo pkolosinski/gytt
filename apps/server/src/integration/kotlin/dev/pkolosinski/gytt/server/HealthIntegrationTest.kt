@@ -19,7 +19,8 @@ class HealthIntegrationTest : FunSpec({
             response.bodyAsText() shouldBe ""
             response.headers[TRACE_ID_HEADER]?.matches(Regex("[0-9a-f-]{36}")) shouldBe true
             response.headers[CONTENT_SECURITY_POLICY_HEADER] shouldBe CONTENT_SECURITY_POLICY
-            response.headers.getAll(CONTENT_SECURITY_POLICY_HEADER) shouldBe listOf(CONTENT_SECURITY_POLICY)
+            response.headers.getAll(CONTENT_SECURITY_POLICY_HEADER) shouldBe
+                listOf(CONTENT_SECURITY_POLICY)
         }
     }
 

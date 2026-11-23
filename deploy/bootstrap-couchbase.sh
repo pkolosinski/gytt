@@ -146,4 +146,15 @@ for collection in "${COLLECTIONS[@]}"; do
     fi
 done
 
+# Tasks are listed by the date they were created on.
+echo "Ensuring the Tasks index..."
+index_response=$(curl --fail --silent --show-error --max-time 30 \
+    --user "$ADMIN_USER:$ADMIN_PASSWORD" \
+    "http://${COUCHBASE_HOST}:8093/query/service" \
+    --data-urlencode "statement=CREATE INDEX IF NOT EXISTS idx_tasks_created_on ON \`${BUCKET_NAME}\`.\`_default\`.\`tasks\`(createdOn)")
+if ! grep -Eq '"status": ?"success"' <<<"$index_response"; then
+    echo "Failed to create the Tasks index: $index_response" >&2
+    exit 1
+fi
+
 echo "Couchbase bootstrap completed successfully"

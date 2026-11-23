@@ -30,6 +30,18 @@ private val traceIdAttributeKey = AttributeKey<String>(TRACE_ID_ATTRIBUTE_NAME)
 private val requestLogger = LoggerFactory.getLogger(REQUEST_LOGGER_NAME)
 private val acceptedTraceId = Regex("[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 
+data class ReadinessResult(
+    val ready: Boolean,
+    val reasonCode: String? = null,
+) {
+    companion object {
+        fun ready(): ReadinessResult = ReadinessResult(ready = true)
+
+        fun unhealthy(reasonCode: String): ReadinessResult =
+            ReadinessResult(ready = false, reasonCode = reasonCode)
+    }
+}
+
 fun Application.configureInfrastructureModule(readinessCheck: suspend () -> ReadinessResult) {
     intercept(ApplicationCallPipeline.Monitoring) {
         val traceId = traceIdOrGenerate(call.request.headers[TRACE_ID_HEADER])

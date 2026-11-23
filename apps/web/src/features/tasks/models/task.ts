@@ -10,7 +10,9 @@ export type TaskListItem = {
   id: string;
   title: string;
   description?: string;
-  createdOn?: LocalDate;
+  createdOn: LocalDate;
+  /** The last revision seen from the server; sent as the precondition for changes. */
+  revision: number;
   status: TaskStatus;
   steps?: TaskListStep[];
 };
@@ -19,3 +21,13 @@ export type TaskListStep = {
   name: string;
   completed: boolean;
 };
+
+export type NewTask = {
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  createdOn: LocalDate;
+  steps?: TaskListStep[];
+};
+
+export type TaskPatch = Partial<Pick<TaskListItem, 'title' | 'description' | 'status' | 'steps'>>;

@@ -34,10 +34,11 @@
     "dragEnd": "„{{title}}” upuszczono w: {{column}}.",
     "dropOutside": "„{{title}}” upuszczono poza kolumnami i nie zostało przeniesione.",
     "dragCancel": "Anulowano przenoszenie „{{title}}”.",
-    "instructions": "Otwórz szczegóły zadania, aby zmienić jego status."
+    "instructions": "Przeciągnij zadanie do kolumny lub zmień jego status na dole karty."
   },
   "column": {
     "count": "{{count}} w: {{status}}",
+    "cancel": "Anuluj",
     "create": "Utwórz",
     "createIn": "Utwórz zadanie w: {{status}}"
   },
@@ -65,9 +66,9 @@
     "yes": "Tak",
     "no": "Nie"
   },
-  "statusMenu": {
-    "trigger": "{{status}}: przenieś „{{title}}”",
-    "moveTo": "Przenieś do"
+  "statusSelect": {
+    "label": "Status zadania „{{title}}”",
+    "field": "Status"
   },
   "moves": {
     "moved": "Przeniesiono „{{title}}” do: {{status}}.",
@@ -76,8 +77,10 @@
     "unavailable": "Nie udało się przenieść „{{title}}”, ponieważ lokalna usługa nie odpowiedziała. Spróbuj ponownie."
   },
   "modal": {
+    "createDescription": "Dodaj zadanie do tablicy.",
     "createTitle": "Utwórz nowe zadanie",
     "taskTitle": "Zadanie",
+    "editDescription": "Zaktualizuj to zadanie.",
     "editTitle": "Edytuj zadanie",
     "loading": "Wczytywanie zadania…",
     "unavailableTitle": "Zadanie niedostępne",

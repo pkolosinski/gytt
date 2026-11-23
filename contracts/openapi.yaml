@@ -1,12 +1,9 @@
 openapi: 3.1.0
 info:
-  title: GYTT API
+  title: GYST API
   version: 0.1.0
   description: |
-    HTTP contract between the GYTT web application and the GYTT server.
-
-    GYTT is a private, single-user product: the API has no accounts, sessions,
-    or per-record permissions.
+    HTTP contract between the GYST web application and the GYST server.
 
     Every response carries an `X-Request-Id` trace ID header. A well-formed
     `X-Request-Id` request header is echoed back; otherwise the server

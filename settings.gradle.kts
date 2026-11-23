@@ -7,7 +7,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "gytt"
+rootProject.name = "gyst"
 include(
     "apps:server",
     "core",

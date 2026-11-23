@@ -1,9 +1,9 @@
 ---
 name: openapi-generator
-description: Use when accepted GYTT behavior needs an HTTP contract defined, changed, or checked for existing coverage. For new UI-backed behavior, enter after approval of the UI and frontend code; backend-only work needs no UI phase.
+description: Use when accepted GYST behavior needs an HTTP contract defined, changed, or checked for existing coverage. For new UI-backed behavior, enter after approval of the UI and frontend code; backend-only work needs no UI phase.
 ---
 
-# GYTT API contract phase
+# GYST API contract phase
 
 ## Establish scope and tooling
 

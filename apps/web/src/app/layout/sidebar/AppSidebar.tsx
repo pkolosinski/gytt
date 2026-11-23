@@ -31,14 +31,14 @@ function SidebarLogo() {
 
   return (
     <Link to="/" className="flex items-center gap-2">
-      {/* Placeholder until the GYTT logo asset exists. */}
+      {/* Placeholder until the GYST logo asset exists. */}
       <span
         aria-hidden="true"
         className="font-heading flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
       >
         G
       </span>
-      {open && <span className="font-heading text-lg">GYTT</span>}
+      {open && <span className="font-heading text-lg">GYST</span>}
     </Link>
   );
 }

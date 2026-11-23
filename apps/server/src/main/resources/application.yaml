@@ -3,10 +3,10 @@ ktor:
     port: 8080
   application:
     modules:
-      - dev.pkolosinski.gytt.server.AppRunnerKt.rootModule
+      - dev.pkolosinski.gyst.server.AppRunnerKt.rootModule
 
 couchbase:
   url: ${COUCHBASE_URL:couchbase://localhost}
   username: ${COUCHBASE_USERNAME:app_user}
   password: ${COUCHBASE_PASSWORD:password}
-  bucket: ${COUCHBASE_BUCKET:gytt}
+  bucket: ${COUCHBASE_BUCKET:gyst}

@@ -1,9 +1,9 @@
 ---
 name: web-integrator
-description: Use to connect approved GYTT frontend behavior to an established HTTP contract, replacing mocks or updating existing integration. Not needed for purely visual edits that preserve data access.
+description: Use to connect approved GYST frontend behavior to an established HTTP contract, replacing mocks or updating existing integration. Not needed for purely visual edits that preserve data access.
 ---
 
-# GYTT web integration phase
+# GYST web integration phase
 
 ## Confirm the boundary
 

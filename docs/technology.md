@@ -1,4 +1,4 @@
-# GYTT technology
+# GYST technology
 
 ## Technology stack
 
@@ -37,16 +37,16 @@
 
 - **Packaging:** Docker multi-stage build produces the web assets and Kotlin
   server artifact, then packages them into a JVM runtime image.
-- **Local orchestration:** Docker Compose runs the GYTT server and Couchbase
+- **Local orchestration:** Docker Compose runs the GYST server and Couchbase
   Community, with one-shot Couchbase bootstrap before the server starts.
 - **Data location:** Couchbase persists to a Compose-managed volume. The
   Compose service network is private and internal.
-- **Development exposure:** GYTT and the Couchbase management console bind to
+- **Development exposure:** GYST and the Couchbase management console bind to
   host loopback. Database data/query services are not published to host/LAN
   ports.
 - **Private deployment direction:** Keep the application listener on loopback
   and place a user-operated reverse proxy in front of it when ready. The proxy
-  will provide the external HTTPS and shared access boundary; GYTT does not
+  will provide the external HTTPS and shared access boundary; GYST does not
   implement accounts or sessions.
 
 ## Architecture and data boundaries

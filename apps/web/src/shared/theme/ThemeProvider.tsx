@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function ThemeProvider({ children, defaultTheme = 'system' }: Props) {
-  const storageKey = 'gytt-ui-theme';
+  const storageKey = 'gyst-ui-theme';
 
   const [theme, setTheme] = useState<Theme>(() => {
     const storedTheme = localStorage.getItem(storageKey);

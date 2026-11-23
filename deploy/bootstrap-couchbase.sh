@@ -5,9 +5,9 @@ COUCHBASE_HOST="${COUCHBASE_HOST:-couchbase}"
 COUCHBASE_PORT="${COUCHBASE_PORT:-8091}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-password}"
-APP_USER="${APP_USER:-gytt-app}"
-APP_PASSWORD="${APP_PASSWORD:-gytt-app-password}"
-BUCKET_NAME="${BUCKET_NAME:-gytt}"
+APP_USER="${APP_USER:-gyst-app}"
+APP_PASSWORD="${APP_PASSWORD:-gyst-app-password}"
+BUCKET_NAME="${BUCKET_NAME:-gyst}"
 COLLECTIONS=("tasks" "habits")
 
 CLI=(couchbase-cli)

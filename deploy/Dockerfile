@@ -37,13 +37,13 @@ FROM eclipse-temurin:17.0.16_8-jre-noble AS runtime
 
 WORKDIR /app
 
-RUN groupadd --system --gid 10001 gytt \
-    && useradd --system --uid 10001 --gid 10001 --home-dir /nonexistent --no-create-home gytt
+RUN groupadd --system --gid 10001 gyst \
+    && useradd --system --uid 10001 --gid 10001 --home-dir /nonexistent --no-create-home gyst
 
-COPY --from=server-build /workspace/apps/server/build/libs/*-all.jar /app/gytt.jar
+COPY --from=server-build /workspace/apps/server/build/libs/*-all.jar /app/gyst.jar
 
 USER 10001:10001
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/gytt.jar"]
+ENTRYPOINT ["java", "-jar", "/app/gyst.jar"]

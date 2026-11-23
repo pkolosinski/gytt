@@ -1,11 +1,11 @@
-# GYTT
+# GYST
 
-GYTT is a private, single-user, local-first life-organization product for daily tasks and habit
+GYST is a private, single-user, local-first life-organization product for daily tasks and habit
 consistency.
 
 ## Ground rules
 
-- Preserve GYTT's private, local-first product boundary.
+- Preserve GYST's private, local-first product boundary.
 -
 -
 

@@ -1,14 +1,14 @@
-# GYTT product
+# GYST product
 
-## What GYTT is for
+## What GYST is for
 
-GYTT (Get Your Things Together) is a private, single-user life-organization
+GYST (Get Your Things Together) is a private, single-user life-organization
 product for daily tasks and habit consistency. It brings one-off work and
 recurring behavior into one practical tool, reducing the effort of maintaining
 separate applications and avoiding fragmentation between deciding what to do
 and building routines.
 
-GYTT is for one person organizing their own everyday responsibilities and
+GYST is for one person organizing their own everyday responsibilities and
 personal routines. It is designed to run in an environment operated by that
 person—initially on the development machine and, when ready, in the user's home
 environment. The product is not a hosted multi-user service.
@@ -65,11 +65,11 @@ screen-by-screen specification. Current implementation status is described in
 
 ## Privacy and product constraints
 
-- GYTT has one user and one private dataset. Accounts, family accounts, shared
+- GYST has one user and one private dataset. Accounts, family accounts, shared
   spaces, resource sharing, and per-record permissions are outside the initial
   product.
 - Personal and usage data stays on the user's devices and within the
-  user-operated environment. GYTT must not rely on a hosted identity provider,
+  user-operated environment. GYST must not rely on a hosted identity provider,
   analytics, third-party telemetry, external feature APIs, or remotely hosted
   runtime assets.
 - The current browser experience requires the user's server/environment to be
@@ -77,7 +77,7 @@ screen-by-screen specification. Current implementation status is described in
   mean the current web app works offline.
 - Development access is localhost-only. A user-operated reverse proxy is the
   planned access boundary when the private deployment is ready.
-- GYTT is not intended to replace a calendar, project-management system,
+- GYST is not intended to replace a calendar, project-management system,
   general-purpose notes or knowledge-management tool, or health application.
 - The initial Tasks capability does not include priorities, deadlines,
   time-of-day scheduling, task recurrence, tags, categories, projects,
@@ -102,6 +102,6 @@ revisit it with the user.
 
 ## Current product state
 
-GYTT is under active development. The web app has application scaffolding and a
+GYST is under active development. The web app has application scaffolding and a
 mock-backed Tasks experience. Persistent Tasks and Habits product behavior and
 their server/API integration remain in development.

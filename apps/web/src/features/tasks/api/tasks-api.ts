@@ -1,4 +1,4 @@
-import type { TaskPatch as ApiTaskPatch, Problem } from '@/shared/generated/api/gyttApi.schemas.ts';
+import type { TaskPatch as ApiTaskPatch, Problem } from '@/shared/generated/api/gystApi.schemas.ts';
 import { createTask, deleteTask, listTasks, updateTask } from '@/shared/generated/api/tasks.ts';
 import type { LocalDate } from '@/shared/lib/local-date.ts';
 import type { NewTask, TaskListItem, TaskPatch } from '../models/task.ts';
@@ -30,7 +30,7 @@ const toApiPatch = (patch: TaskPatch): ApiTaskPatch => ({
   ...('description' in patch && { description: patch.description ?? null }),
 });
 
-/** The Tasks API backed by the GYTT server. */
+/** The Tasks API backed by the GYST server. */
 export const tasksApi: TasksApi = {
   async listTasks(date) {
     const res = await listTasks({ date });

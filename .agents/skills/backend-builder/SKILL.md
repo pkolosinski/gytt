@@ -1,9 +1,9 @@
 ---
 name: backend-builder
-description: Use for GYTT server/core implementation and backend-only changes. For new UI-backed behavior, follow the approved UI, contract, and web integration phases; internal backend changes need no UI prerequisites.
+description: Use for GYST server/core implementation and backend-only changes. For new UI-backed behavior, follow the approved UI, contract, and web integration phases; internal backend changes need no UI prerequisites.
 ---
 
-# GYTT backend phase
+# GYST backend phase
 
 ## Enter at the relevant boundary
 

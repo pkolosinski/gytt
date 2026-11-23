@@ -1,9 +1,9 @@
 ---
 name: feature-planner
-description: Use for new GYTT capabilities and consequential product or architectural changes. For small behavior changes, select a lightweight path; continue active UI drafts without restarting planning.
+description: Use for new GYST capabilities and consequential product or architectural changes. For small behavior changes, select a lightweight path; continue active UI drafts without restarting planning.
 ---
 
-# GYTT feature workflow
+# GYST feature workflow
 
 ## Select the smallest useful workflow
 

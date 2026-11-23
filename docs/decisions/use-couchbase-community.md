@@ -3,4 +3,4 @@
 Status: accepted  
 Category: technology
 
-GYTT will use Couchbase Community for persistence.
+GYST will use Couchbase Community for persistence.

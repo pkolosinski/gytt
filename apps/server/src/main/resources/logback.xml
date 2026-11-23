@@ -12,7 +12,7 @@
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="dev.pkolosinski.gytt.server.request" level="INFO" additivity="false">
+    <logger name="dev.pkolosinski.gyst.server.request" level="INFO" additivity="false">
         <appender-ref ref="REQUEST_JSON"/>
     </logger>
     <logger name="org.eclipse.jetty" level="INFO"/>

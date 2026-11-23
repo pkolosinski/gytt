@@ -1,7 +1,7 @@
 import { defineConfig } from 'orval';
 
 export default defineConfig({
-  gytt: {
+  gyst: {
     input: '../../contracts/openapi.yaml',
     output: {
       client: 'fetch',

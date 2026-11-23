@@ -1,9 +1,9 @@
 ---
 name: ui-designer
-description: Use for GYTT visual changes, new UI drafts, and revisions or additions to the view currently being prepared. Keep UI review open until the user approves both appearance and frontend code for progression.
+description: Use for GYST visual changes, new UI drafts, and revisions or additions to the view currently being prepared. Keep UI review open until the user approves both appearance and frontend code for progression.
 ---
 
-# GYTT UI workshop
+# GYST UI workshop
 
 ## Start from the current request
 

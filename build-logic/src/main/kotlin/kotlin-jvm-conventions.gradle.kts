@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.findLibrary("arrow-core").get())
     implementation(libs.findLibrary("arrow-fx-coroutines").get())
 
+    testImplementation(libs.findLibrary("kotest-assertions-arrow").get())
     testImplementation(libs.findLibrary("kotest-assertions-core").get())
     testImplementation(libs.findLibrary("kotest-runner").get())
     testImplementation(libs.findLibrary("mockk-jvm").get())

@@ -1,4 +1,4 @@
-package dev.pkolosinski.gyst.core.tasks
+package dev.pkolosinski.gyst.core.task
 
 import arrow.core.Either
 import arrow.core.raise.either
@@ -12,7 +12,7 @@ internal class DefaultTaskFacade(
     private val idGenerator: () -> TaskId,
 ) : TaskFacade {
     override suspend fun list(range: DateRange): List<Task> =
-        store.listActiveOrderedByCreatedAt(range.from, range.to)
+        store.listActiveBetween(range.from, range.to)
 
     override suspend fun create(input: TaskDetails, createdAt: Instant): Either<TaskError, Task> {
         val newTask = Task(
@@ -37,9 +37,9 @@ internal class DefaultTaskFacade(
         patch: TaskPatch,
     ): Either<TaskError, Task> = update(id, expectedVersion) { it.apply(patch) }
 
-    override suspend fun archive(id: TaskId) {
+    override suspend fun archive(id: TaskId): Either<TaskError, Unit> = either {
         store.findById(id)?.let {
-            val archived = it.withUpdate(
+            val archived = it.nextVersion(
                 newDetails = it.details.copy(status = TaskStatus.ARCHIVED),
             )
             store.replace(id, archived)
@@ -56,7 +56,7 @@ internal class DefaultTaskFacade(
         ensureNotNull(existing) { TaskError.NotFound(id) }
         ensure(existing.version == expectedVersion) { TaskError.RevisionMismatch(id) }
 
-        val updated = existing.withUpdate(newDetails = newFields(existing.details))
+        val updated = existing.nextVersion(newDetails = newFields(existing.details))
         store.replace(id, updated)
 
         updated

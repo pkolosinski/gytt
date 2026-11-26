@@ -1,12 +1,12 @@
 package dev.pkolosinski.gyst.server.tasks
 
 import arrow.core.Either
-import dev.pkolosinski.gyst.core.tasks.Task
-import dev.pkolosinski.gyst.core.tasks.TaskError
-import dev.pkolosinski.gyst.core.tasks.TaskFacade
-import dev.pkolosinski.gyst.core.tasks.TaskId
-import dev.pkolosinski.gyst.core.tasks.TaskStoreUnavailableException
-import dev.pkolosinski.gyst.core.tasks.Violation
+import dev.pkolosinski.gyst.core.task.Task
+import dev.pkolosinski.gyst.core.task.TaskError
+import dev.pkolosinski.gyst.core.task.TaskFacade
+import dev.pkolosinski.gyst.core.task.TaskId
+import dev.pkolosinski.gyst.core.task.TaskStoreUnavailableException
+import dev.pkolosinski.gyst.core.task.Violation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode

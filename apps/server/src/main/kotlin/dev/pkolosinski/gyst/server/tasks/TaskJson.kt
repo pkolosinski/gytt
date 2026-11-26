@@ -1,10 +1,10 @@
 package dev.pkolosinski.gyst.server.tasks
 
-import dev.pkolosinski.gyst.core.tasks.Task
-import dev.pkolosinski.gyst.core.tasks.TaskDetails
-import dev.pkolosinski.gyst.core.tasks.TaskId
-import dev.pkolosinski.gyst.core.tasks.TaskStatus
-import dev.pkolosinski.gyst.core.tasks.TaskStep
+import dev.pkolosinski.gyst.core.task.Task
+import dev.pkolosinski.gyst.core.task.TaskDetails
+import dev.pkolosinski.gyst.core.task.TaskId
+import dev.pkolosinski.gyst.core.task.TaskStatus
+import dev.pkolosinski.gyst.core.task.TaskStep
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.LocalDate

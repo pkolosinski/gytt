@@ -1,11 +1,11 @@
 package dev.pkolosinski.gyst.server.tasks
 
-import dev.pkolosinski.gyst.core.tasks.Task
-import dev.pkolosinski.gyst.core.tasks.TaskId
-import dev.pkolosinski.gyst.core.tasks.TaskStore
-import dev.pkolosinski.gyst.core.tasks.TaskStoreUnavailableException
-import dev.pkolosinski.gyst.core.tasks.WriteResult
-import dev.pkolosinski.gyst.core.tasks.taskFacade
+import dev.pkolosinski.gyst.core.task.Task
+import dev.pkolosinski.gyst.core.task.TaskId
+import dev.pkolosinski.gyst.core.task.TaskStore
+import dev.pkolosinski.gyst.core.task.TaskStoreUnavailableException
+import dev.pkolosinski.gyst.core.task.WriteResult
+import dev.pkolosinski.gyst.core.task.taskFacade
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
@@ -43,7 +43,7 @@ private class MemoryStore : TaskStore {
         if (unavailable) throw TaskStoreUnavailableException(RuntimeException("down"))
     }
 
-    override suspend fun listActiveOrderedByCreatedAt(from: LocalDate, to: LocalDate): List<Task> {
+    override suspend fun listActiveBetween(from: LocalDate, to: LocalDate): List<Task> {
         check()
         return tasks.values.filter {
             val completedOn = it.completedOn

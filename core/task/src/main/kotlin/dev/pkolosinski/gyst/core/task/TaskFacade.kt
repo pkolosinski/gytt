@@ -1,8 +1,7 @@
-package dev.pkolosinski.gyst.core.tasks
+package dev.pkolosinski.gyst.core.task
 
 import arrow.core.Either
 import java.time.Instant
-import java.time.LocalDate
 
 interface TaskFacade {
     suspend fun list(range: DateRange): List<Task>
@@ -21,14 +20,8 @@ interface TaskFacade {
         patch: TaskPatch,
     ): Either<TaskError, Task>
 
-    suspend fun archive(id: TaskId)
+    suspend fun archive(id: TaskId): Either<TaskError, Unit>
 }
 
 fun taskFacade(store: TaskStore, idGenerator: () -> TaskId): TaskFacade =
     DefaultTaskFacade(store, idGenerator)
-
-data class DateRange(val from: LocalDate, val to: LocalDate) {
-    init {
-        require(!from.isAfter(to)) { "from=$from must not be after to=$to" }
-    }
-}

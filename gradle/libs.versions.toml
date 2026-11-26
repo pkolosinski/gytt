@@ -26,6 +26,7 @@ testcontainers-couchbase = { module = "org.testcontainers:testcontainers-couchba
 ulid-creator = { module = "com.github.f4b6a3:ulid-creator", version.ref = "ulid-creator" }
 
 # kotest
+kotest-assertions-arrow = { module = "io.kotest:kotest-assertions-arrow", version.ref = "kotest" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit6", version.ref = "kotest" }
 

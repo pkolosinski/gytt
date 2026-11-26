@@ -2,8 +2,8 @@ package dev.pkolosinski.gyst.server
 
 import com.couchbase.client.kotlin.Cluster
 import com.github.f4b6a3.ulid.UlidCreator
-import dev.pkolosinski.gyst.core.tasks.TaskId
-import dev.pkolosinski.gyst.core.tasks.taskFacade
+import dev.pkolosinski.gyst.core.task.TaskId
+import dev.pkolosinski.gyst.core.task.taskFacade
 import dev.pkolosinski.gyst.server.infrastructure.CouchbaseProperties
 import dev.pkolosinski.gyst.server.infrastructure.ReadinessResult
 import dev.pkolosinski.gyst.server.infrastructure.configureInfrastructureModule

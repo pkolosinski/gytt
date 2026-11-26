@@ -1,4 +1,4 @@
-package dev.pkolosinski.gyst.core.tasks
+package dev.pkolosinski.gyst.core.task
 
 import arrow.core.None
 import arrow.core.Option
@@ -16,7 +16,7 @@ data class Task(
     /** Starts at 1 and increases on every change. */
     val version: Long = 1L,
 ) {
-    fun withUpdate(newDetails: TaskDetails): Task = copy(
+    fun nextVersion(newDetails: TaskDetails): Task = copy(
         details = newDetails,
         version = version + 1,
     )

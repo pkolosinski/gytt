@@ -9,11 +9,11 @@ import com.couchbase.client.kotlin.codec.Content
 import com.couchbase.client.kotlin.query.QueryParameters
 import com.couchbase.client.kotlin.query.QueryScanConsistency
 import com.couchbase.client.kotlin.query.execute
-import dev.pkolosinski.gyst.core.tasks.Task
-import dev.pkolosinski.gyst.core.tasks.TaskId
-import dev.pkolosinski.gyst.core.tasks.TaskStore
-import dev.pkolosinski.gyst.core.tasks.TaskStoreUnavailableException
-import dev.pkolosinski.gyst.core.tasks.WriteResult
+import dev.pkolosinski.gyst.core.task.Task
+import dev.pkolosinski.gyst.core.task.TaskId
+import dev.pkolosinski.gyst.core.task.TaskStore
+import dev.pkolosinski.gyst.core.task.TaskStoreUnavailableException
+import dev.pkolosinski.gyst.core.task.WriteResult
 import java.time.LocalDate
 
 private const val TASKS_COLLECTION = "tasks"
@@ -30,7 +30,7 @@ internal class CouchbaseTaskStore(
         cluster.bucket(bucketName).defaultScope().collection(TASKS_COLLECTION),
     )
 
-    override suspend fun listActiveOrderedByCreatedAt(from: LocalDate, to: LocalDate): List<Task> =
+    override suspend fun listActiveBetween(from: LocalDate, to: LocalDate): List<Task> =
         unavailableOnFailure {
             cluster.query(
                 "SELECT RAW t FROM `$bucketName`.`_default`.`$TASKS_COLLECTION` AS t " +
